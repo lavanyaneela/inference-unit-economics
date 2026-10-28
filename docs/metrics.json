@@ -32,8 +32,8 @@
     "tf_unrepresentable": 17,
     "blockless_placements": 3,
     "capture_date": "2026-10-28",
-    "tests_total": 167,
-    "coverage_line_pct": 97.9633401221996
+    "tests_total": 169,
+    "coverage_line_pct": 97.97365754812563
   },
   "rendered": {
     "serving_rps": "93,104",
@@ -68,7 +68,7 @@
     "tf_unrepresentable": "17",
     "blockless_placements": "3",
     "capture_date": "2026-10-28",
-    "tests_total": "167",
+    "tests_total": "169",
     "coverage_line_pct": "98.0"
   },
   "anchors": {

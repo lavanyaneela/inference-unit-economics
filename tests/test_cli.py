@@ -236,3 +236,27 @@ def test_the_deferred_refusal_uses_the_batch_band_too(capsys):
     code = main(["decide", "--latency", "deferred", "--max-band-pct", str(ceiling)])
     assert code == EXIT_REFUSED
     assert "batch throughput band" in capsys.readouterr().out
+
+
+def test_the_deferred_report_writes_instead_of_crashing(tmp_path):
+    """Pass three of the audit ran a documented command, `iue report --latency
+    deferred`, and it exited 3: every deferred verdict is undecided on the
+    margin floor with no flip at all, and the report's not decided branch
+    formatted the absent flip. The report now mirrors the CLI's two way
+    reason."""
+    out = tmp_path / "deferred.html"
+    assert main(["report", "--latency", "deferred", "--out", str(out)]) == EXIT_DECIDED
+    text = out.read_text(encoding="utf-8")
+    assert "badge-undecided" in text
+    assert "floor" in text
+
+
+def test_the_report_refuses_on_the_same_band_the_cli_does(tmp_path):
+    from inference_unit_economics.bench.profile import load_profile
+
+    profile = load_profile()
+    ceiling = (profile.serving_band_pct + profile.batch_band_pct) / 2
+    out = tmp_path / "refused.html"
+    main(["report", "--latency", "deferred", "--max-band-pct", str(ceiling),
+          "--out", str(out)])
+    assert "badge-refused" in out.read_text(encoding="utf-8")

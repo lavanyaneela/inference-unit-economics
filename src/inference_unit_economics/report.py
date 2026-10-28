@@ -50,7 +50,7 @@ def write_report(out: Path, cards: dict[str, RateCard], scenario: Scenario,
                  profile: ThroughputProfile, *, latency: str = "interactive") -> Path:
     from .cli import _keys  # the same placement filter the CLI decides with
 
-    refusal = refuses(scenario, profile)
+    refusal = refuses(scenario, profile, include_batch=latency == "deferred")
     within = _keys(cards, latency)
     parts: list[str] = []
     parts.append("<h1>inference-unit-economics report</h1>")
@@ -82,12 +82,26 @@ def write_report(out: Path, cards: dict[str, RateCard], scenario: Scenario,
                 f"stays cheapest across the measured {sens.band_pct:.1f}% band.</p>"
             )
         else:
-            parts.append(
-                f"<p>The lead between {html.escape(sens.winner)} and "
-                f"{html.escape(sens.runner_up)} changes after a "
-                f"{sens.flip_move_pct:.1f}% throughput move, inside the measured "
-                f"{sens.band_pct:.1f}% band. The measurement cannot pick.</p>"
-            )
+            # Mirrors the CLI's two way reason. The margin floor and tie fixes
+            # created an undecided state with no flip at all (every deferred
+            # verdict, in fact: batch costs do not move with traffic), and the
+            # first version of this branch formatted the absent flip and
+            # crashed a documented command with exit 3.
+            if not sens.margin_meaningful:
+                reason = (
+                    f"{html.escape(sens.winner)} leads "
+                    f"{html.escape(sens.runner_up)} by only "
+                    f"{sens.margin_ratio:.2f}x, under the declared "
+                    f"{sens.margin_floor:.2f}x floor."
+                )
+            else:
+                reason = (
+                    f"The lead between {html.escape(sens.winner)} and "
+                    f"{html.escape(sens.runner_up)} changes after a "
+                    f"{sens.flip_move_pct:.1f}% throughput move, inside the "
+                    f"measured {sens.band_pct:.1f}% band."
+                )
+            parts.append(f"<p>{reason} The inputs cannot pick.</p>")
         parts.append("<h2>Cost per 1,000 inferences</h2>")
         rows = []
         for line in lines:

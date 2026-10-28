@@ -101,8 +101,12 @@ def load_profile(path: Path = THROUGHPUT_PROFILE,
             f"{raw['model_sha256'][:12]}..., the committed model is "
             f"{expected_model_sha256[:12]}... Re-run `make profile`."
         )
+    import statistics
+
     for size, entry in raw["batch_sizes"].items():
         runs = entry.get("runs_rps", [])
+        if not runs:
+            raise ProfileError(f"batch size {size} records no runs at all")
         if len(runs) != raw["trials"]:
             raise ProfileError(
                 f"batch size {size} records {len(runs)} runs but the profile claims "
@@ -113,8 +117,6 @@ def load_profile(path: Path = THROUGHPUT_PROFILE,
         # profile with band_pct hand edited from 16.58 to 3.0: the loader
         # accepted it, and a tampered band is exactly the number the refusal
         # semantics hang on. The summary is derivable, so it is derived.
-        import statistics
-
         median = statistics.median(runs)
         expected = {
             "best_rps": max(runs),

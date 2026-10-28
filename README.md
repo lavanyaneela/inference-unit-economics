@@ -30,10 +30,10 @@ the cheap choice changes. Questions it answers that a pricing page cannot:
   per second on GCP and a **flip at 280.9 requests** per second on AWS:
   **30.5x apart**, and nothing the model does moves it. The gap decomposes
   exactly: a **1.05x instance price** difference times a **29.0x per request**
-  cost difference. The second term is the billing increments' 100x pulled back
-  by everything else in a per request bill: Cloud Run prices its billed
-  millisecond below SageMaker's, AWS adds a payload fee that outweighs its
-  compute, and GCP adds a request fee. On Azure the flip never arrives in
+  cost difference. The second term is the billing increments' 100x pulled
+  down by Cloud Run's cheaper billed millisecond and by an AWS payload fee
+  that outweighs its compute, then pushed part of the way back up by GCP's
+  request fee. On Azure the flip never arrives in
   the swept range.
 - **A fast model is billed for the rounding, not the work.** The committed model
   sustains **93,104 single row requests** per second per process, so one request
@@ -62,7 +62,7 @@ is aws/serverless** at **$0.11 per million** inferences with a **margin of
 classes the full table spans **4,400x the cost** from cheapest line (a batch
 job) to dearest, **143.1x within the** interactive lines alone. Every bold figure above is produced by code in this
 repository, re-measured by `make verify`, and guarded against the prose by
-`tools/check_numbers.py`: **167 tests**, **98.0% line coverage**, rate cards and
+`tools/check_numbers.py`: **169 tests**, **98.0% line coverage**, rate cards and
 profile **both captured 2026-10-28**.
 
 ## Quickstart
