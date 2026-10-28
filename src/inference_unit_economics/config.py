@@ -11,7 +11,7 @@ across module constants is how a cost comparison becomes unfalsifiable.
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
@@ -85,7 +85,7 @@ class Scenario:
 
     @classmethod
     def from_dict(cls, raw: dict) -> Scenario:
-        unknown = set(raw) - {f for f in cls.__dataclass_fields__}
+        unknown = set(raw) - set(cls.__dataclass_fields__)
         if unknown:
             raise ScenarioError(f"unknown scenario fields: {sorted(unknown)}")
         return cls(**raw)

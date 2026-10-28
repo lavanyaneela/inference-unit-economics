@@ -50,3 +50,13 @@ src = ["src", "tests", "tools", "experiments"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "W", "C4", "SIM"]
 ignore = ["B008"]
+
+[tool.coverage.run]
+# model/build.py needs the train extra and runs only when the fixture is rebuilt.
+# Counting a deliberately-off-the-default-path module in the denominator would
+# publish a coverage figure unreachable in CI; the exclusion is disclosed in the
+# README's reproduction section.
+omit = ["src/inference_unit_economics/model/build.py"]
+
+[tool.coverage.report]
+exclude_lines = ["if __name__ == .__main__.:", "raise SystemExit"]

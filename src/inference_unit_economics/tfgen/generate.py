@@ -276,5 +276,5 @@ def generate_all(scenario: Scenario | None = None,
 
 
 if __name__ == "__main__":
-    for provider, path in generate_all().items():
+    for path in generate_all().values():
         print(f"wrote {path}")

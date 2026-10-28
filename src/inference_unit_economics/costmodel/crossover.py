@@ -15,7 +15,7 @@ import numpy as np
 
 from ..bench.profile import ThroughputProfile
 from ..config import Scenario
-from .costing import CostingError, CostLine, cost_all
+from .costing import CostingError, CostLine
 from .ratecards import RateCard
 
 GRID_MIN_RPS = 0.01
@@ -32,27 +32,16 @@ class Crossover:
     cheaper_above: str
 
 
-def _cheapest(cards: dict[str, RateCard], scenario: Scenario,
-              profile: ThroughputProfile, *, within: tuple[str, ...] | None = None
-              ) -> CostLine:
-    lines = cost_all(cards, scenario, profile)
-    if within is not None:
-        lines = [line for line in lines if line.key in within]
-    return lines[0]
-
-
 def _cheapest_key(cards, scenario, profile, rps, within=None) -> str:
-    try:
-        return _cheapest(cards, replace(scenario, traffic_rps=rps), profile,
-                         within=within).key
-    except CostingError:
-        # A placement that refuses at this volume simply is not the cheapest one.
-        lines = [
-            line for line in cost_all_safe(cards, replace(scenario, traffic_rps=rps),
-                                           profile)
-            if within is None or line.key in within
-        ]
-        return lines[0].key
+    """The leader at one volume. A placement that refuses at this volume (for
+    example a while running group above its capacity) is simply absent from the
+    race there, which is what cost_all_safe encodes."""
+    lines = [
+        line for line in cost_all_safe(cards, replace(scenario, traffic_rps=rps),
+                                       profile)
+        if within is None or line.key in within
+    ]
+    return lines[0].key
 
 
 def cost_all_safe(cards: dict[str, RateCard], scenario: Scenario,

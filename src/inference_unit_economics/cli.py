@@ -235,7 +235,7 @@ def cmd_coverage(args: argparse.Namespace) -> int:
 
 
 def cmd_terraform(args: argparse.Namespace) -> int:
-    for provider, path in generate_all(_scenario(args)).items():
+    for path in generate_all(_scenario(args)).values():
         print(f"wrote {path}")
     return EXIT_DECIDED
 
@@ -243,11 +243,16 @@ def cmd_terraform(args: argparse.Namespace) -> int:
 def cmd_profile(args: argparse.Namespace) -> int:
     from .bench.harness import measure, write_profile
 
+    knobs = {}
+    if args.trials is not None:
+        knobs["trials"] = args.trials
+    if args.min_seconds is not None:
+        knobs["min_seconds"] = args.min_seconds
     if args.write:
-        profile = write_profile(Path(args.profile))
+        profile = write_profile(Path(args.profile), **knobs)
         print(f"wrote {args.profile}")
     else:
-        profile = measure()
+        profile = measure(**knobs)
         print("measured (not written; pass --write to replace the committed profile)")
     print(json.dumps({k: profile[k] for k in (
         "serving_rps", "serving_band_pct", "serving_range_pct",
@@ -313,6 +318,8 @@ def build_parser() -> argparse.ArgumentParser:
     profile = sub.add_parser("profile", help="re-measure this machine")
     profile.add_argument("--write", action="store_true")
     profile.add_argument("--profile", default=str(THROUGHPUT_PROFILE))
+    profile.add_argument("--trials", type=int, default=None)
+    profile.add_argument("--min-seconds", type=float, default=None)
     profile.set_defaults(func=cmd_profile)
 
     report = sub.add_parser("report", help="write the HTML report")
@@ -327,18 +334,21 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return args.func(args)
+    except ProfileError as exc:
+        # Ordered before the general handler on purpose: ProfileError subclasses
+        # ValueError, and the first version of this function listed the general
+        # clause first, which silently turned every refusal into exit 3. A test
+        # that asserts the exit code caught it. A profile that cannot be trusted
+        # is a refusal: the question is unanswerable from this measurement.
+        print(f"refused: {exc}", file=sys.stderr)
+        if os.environ.get("IUE_DEBUG"):
+            raise
+        return EXIT_REFUSED
     except (ScenarioError, RateCardError, TerraformError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         if os.environ.get("IUE_DEBUG"):
             raise
         return EXIT_ERROR
-    except ProfileError as exc:
-        # A profile that cannot be trusted is a refusal, not a tool error: the
-        # question is unanswerable from this measurement, which is exit 2's job.
-        print(f"refused: {exc}", file=sys.stderr)
-        if os.environ.get("IUE_DEBUG"):
-            raise
-        return EXIT_REFUSED
     except Exception as exc:  # noqa: BLE001  (the documented escape hatch)
         print(f"tool error: {exc}", file=sys.stderr)
         if os.environ.get("IUE_DEBUG"):

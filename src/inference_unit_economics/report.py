@@ -53,7 +53,7 @@ def write_report(out: Path, cards: dict[str, RateCard], scenario: Scenario,
     refusal = refuses(scenario, profile)
     within = _keys(cards, latency)
     parts: list[str] = []
-    parts.append(f"<h1>inference-unit-economics report</h1>")
+    parts.append("<h1>inference-unit-economics report</h1>")
     captured = ", ".join(
         f"{card.display_name} {card.captured_utc}" for card in cards.values()
     )
