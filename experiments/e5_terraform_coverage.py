@@ -26,6 +26,9 @@ def main() -> dict:
     print(f"representable: {result['represented_count']} "
           f"({', '.join(result['represented'])})")
     print(f"unrepresentable: {result['structurally_unrepresentable_count']}")
+    print(f"placements with no resource block: "
+          f"{result['blockless_placements_count']} of {result['placements_total']} "
+          f"({', '.join(result['blockless_placements'])})")
     for quantity in result["structurally_unrepresentable"]:
         print(f"  {quantity}")
     return result

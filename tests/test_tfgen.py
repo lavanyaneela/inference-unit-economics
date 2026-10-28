@@ -88,3 +88,43 @@ def test_coverage_counts_are_consistent(tmp_path):
     payload = coverage(directory=tmp_path).to_dict()
     assert payload["represented_count"] + payload["missing_count"] \
         == payload["quantities_total"]
+
+
+def test_the_blockless_count_is_computed_and_names_every_batch_placement(tmp_path):
+    """The second audit caught the prose asserting two blockless placements
+    while the committed files held three; the count is now parsed from the
+    generator's manifest, verified both ways against the files."""
+    generate_all(Scenario(), out_dir=tmp_path)
+    result = coverage(directory=tmp_path)
+    assert set(result.blockless_placements) == {"aws/batch", "azure/batch",
+                                                "gcp/batch"}
+    assert result.placements_total == 12
+
+
+def test_a_manifest_claiming_a_phantom_resource_is_refused(tmp_path):
+    import json
+
+    generate_all(Scenario(), out_dir=tmp_path)
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    manifest["resources_by_placement"]["gcp"]["batch"] = ["google_ghost.job"]
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(TerraformError, match="google_ghost.job"):
+        coverage(directory=tmp_path)
+
+
+def test_a_declared_resource_claimed_by_nothing_is_refused(tmp_path):
+    import json
+
+    generate_all(Scenario(), out_dir=tmp_path)
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    manifest["resources_by_placement"]["azure"]["serverless"] = []
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(TerraformError, match="claimed by no placement"):
+        coverage(directory=tmp_path)
+
+
+def test_a_missing_manifest_points_at_the_make_target(tmp_path):
+    generate_all(Scenario(), out_dir=tmp_path)
+    (tmp_path / "manifest.json").unlink()
+    with pytest.raises(TerraformError, match="make terraform"):
+        coverage(directory=tmp_path)

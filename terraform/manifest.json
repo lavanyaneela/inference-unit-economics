@@ -1,0 +1,52 @@
+{
+  "resources_by_placement": {
+    "aws": {
+      "realtime_dedicated": [
+        "aws_sagemaker_endpoint_configuration.dedicated",
+        "aws_sagemaker_endpoint.dedicated"
+      ],
+      "realtime_autoscaled": [
+        "aws_appautoscaling_target.endpoint",
+        "aws_appautoscaling_policy.endpoint"
+      ],
+      "serverless": [
+        "aws_sagemaker_endpoint_configuration.serverless",
+        "aws_sagemaker_endpoint.serverless"
+      ],
+      "batch": []
+    },
+    "gcp": {
+      "realtime_dedicated": [
+        "google_vertex_ai_endpoint.endpoint"
+      ],
+      "realtime_autoscaled": [
+        "google_vertex_ai_endpoint.endpoint"
+      ],
+      "serverless": [
+        "google_cloud_run_v2_service.serverless"
+      ],
+      "batch": []
+    },
+    "azure": {
+      "realtime_dedicated": [
+        "azurerm_machine_learning_workspace.ws"
+      ],
+      "realtime_autoscaled": [
+        "azurerm_machine_learning_workspace.ws"
+      ],
+      "serverless": [
+        "azurerm_container_group.serverless"
+      ],
+      "batch": []
+    }
+  },
+  "shared_resources": {
+    "aws": [
+      "aws_sagemaker_model.model"
+    ],
+    "gcp": [],
+    "azure": [
+      "azurerm_resource_group.rg"
+    ]
+  }
+}

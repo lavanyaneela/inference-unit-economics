@@ -1,10 +1,13 @@
-"""Generates real Terraform for each placement, offline.
+"""Generates real Terraform per provider, for the placements the format can hold.
 
-The HCL is real in the sense that matters for E5: each file declares the resources
-a team would actually apply for that placement, with the attributes those resources
-actually take. No terraform binary and no cloud account is assumed; if a binary is
-present, `make tf-validate` runs `terraform validate` as an optional step, and
-ADR-002 records exactly which claims a real plan and apply would add.
+The HCL is real in the sense that matters for E5: each file declares the
+resources a team would actually apply, with the attributes those resources
+actually take, and the manifest written beside the files records which
+placements got resource blocks and which got none, so the blockless count is
+parsed and counted rather than asserted. No terraform binary and no cloud
+account is assumed; a reader with the binary can run `terraform init` and
+`terraform validate` themselves, and ADR-002 records exactly which claims that
+step, a plan, and an apply would each add.
 
 The point of generating it is not to deploy. It is to hold the infrastructure
 definition next to the cost model and count, mechanically, how many of the
@@ -262,9 +265,53 @@ variable "storage_account_id" {{ type = string }}
 
 GENERATORS = {"aws": _aws, "gcp": _gcp, "azure": _azure}
 
+#: Which resource addresses each placement's definition consists of, plus the
+#: scaffolding every placement shares. An empty placement list is a placement
+#: with no resource block: a job, not infrastructure. The coverage map
+#: verifies every listed address against the parsed files in both directions
+#: (nothing phantom, nothing unclaimed) and counts the empty lists, so the
+#: "no resource block at all" sentence in the documents is a computed figure.
+SHARED_RESOURCES: dict[str, list[str]] = {
+    "aws": ["aws_sagemaker_model.model"],
+    "gcp": [],
+    "azure": ["azurerm_resource_group.rg"],
+}
+
+RESOURCES_BY_PLACEMENT: dict[str, dict[str, list[str]]] = {
+    "aws": {
+        "realtime_dedicated": [
+            "aws_sagemaker_endpoint_configuration.dedicated",
+            "aws_sagemaker_endpoint.dedicated",
+        ],
+        "realtime_autoscaled": [
+            "aws_appautoscaling_target.endpoint",
+            "aws_appautoscaling_policy.endpoint",
+        ],
+        "serverless": [
+            "aws_sagemaker_endpoint_configuration.serverless",
+            "aws_sagemaker_endpoint.serverless",
+        ],
+        "batch": [],
+    },
+    "gcp": {
+        "realtime_dedicated": ["google_vertex_ai_endpoint.endpoint"],
+        "realtime_autoscaled": ["google_vertex_ai_endpoint.endpoint"],
+        "serverless": ["google_cloud_run_v2_service.serverless"],
+        "batch": [],
+    },
+    "azure": {
+        "realtime_dedicated": ["azurerm_machine_learning_workspace.ws"],
+        "realtime_autoscaled": ["azurerm_machine_learning_workspace.ws"],
+        "serverless": ["azurerm_container_group.serverless"],
+        "batch": [],
+    },
+}
+
 
 def generate_all(scenario: Scenario | None = None,
                  out_dir: Path = TERRAFORM_DIR) -> dict[str, Path]:
+    import json
+
     scenario = scenario or Scenario()
     out_dir.mkdir(parents=True, exist_ok=True)
     written = {}
@@ -272,6 +319,10 @@ def generate_all(scenario: Scenario | None = None,
         path = out_dir / f"{provider}.tf"
         path.write_text(generator(scenario), encoding="utf-8")
         written[provider] = path
+    (out_dir / "manifest.json").write_text(
+        json.dumps({"resources_by_placement": RESOURCES_BY_PLACEMENT,
+                    "shared_resources": SHARED_RESOURCES}, indent=2)
+        + "\n", encoding="utf-8")
     return written
 
 

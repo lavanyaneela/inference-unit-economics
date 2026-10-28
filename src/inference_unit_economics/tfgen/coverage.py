@@ -97,6 +97,12 @@ class Coverage:
     #: schema in use could hold them, so no edit to the generator closes the gap.
     structurally_unrepresentable: tuple[str, ...]
     attribute_paths_total: int
+    #: Placements whose definition consists of zero resource blocks, counted
+    #: from the generator's committed manifest after verifying every listed
+    #: address against the parsed files. An audit caught the earlier prose
+    #: asserting "two" where the files held three.
+    blockless_placements: tuple[str, ...]
+    placements_total: int
 
     def to_dict(self) -> dict:
         return {
@@ -108,6 +114,9 @@ class Coverage:
             "structurally_unrepresentable_count": len(self.structurally_unrepresentable),
             "quantities_total": len(QUANTITIES),
             "attribute_paths_total": self.attribute_paths_total,
+            "blockless_placements": list(self.blockless_placements),
+            "blockless_placements_count": len(self.blockless_placements),
+            "placements_total": self.placements_total,
         }
 
 
@@ -122,9 +131,11 @@ def coverage(consumed_quantities: tuple[str, ...] | None = None,
             f"about: {unknown}. Add them to REPRESENTATION with their possible "
             "homes, or with an empty tuple and a reason."
         )
+    parsed = parse_dir(directory)
     leaves = {}
-    for provider, tree in parse_dir(directory).items():
+    for provider, tree in parsed.items():
         leaves.update({f"{provider}:{path}": v for path, v in _flatten(tree).items()})
+    blockless, total = _blockless(parsed, directory)
     represented, missing, structural = [], [], []
     for quantity in quantities:
         homes = REPRESENTATION[quantity]
@@ -138,7 +149,70 @@ def coverage(consumed_quantities: tuple[str, ...] | None = None,
         represented=tuple(represented), missing=tuple(missing),
         structurally_unrepresentable=tuple(structural),
         attribute_paths_total=len(leaves),
+        blockless_placements=blockless, placements_total=total,
     )
+
+
+def _declared_resources(tree: dict) -> set[str]:
+    addresses: set[str] = set()
+    for block in tree.get("resource", []):
+        for rtype, named in block.items():
+            # python-hcl2 keeps the source's quote characters inside label
+            # keys, so the type and name arrive wearing their own quotes.
+            clean_type = rtype.strip('"')
+            for name in named:
+                if name == "__is_block__":
+                    continue
+                addresses.add(f"{clean_type}.{name.strip(chr(34))}")
+    return addresses
+
+
+def _blockless(parsed: dict[str, dict], directory: Path) -> tuple[tuple[str, ...], int]:
+    """Count the placements with zero resource blocks, against the files.
+
+    The manifest is the generator's claim; this function holds it to the parsed
+    reality in both directions. Every address the manifest lists must exist in
+    the files, and every resource the files declare must be claimed by some
+    placement, so neither a phantom block nor an unclaimed one can skew the
+    count."""
+    manifest_path = directory / "manifest.json"
+    if not manifest_path.exists():
+        raise TerraformError(
+            f"no manifest at {manifest_path}; run `make terraform` so the "
+            "blockless count is computed rather than asserted"
+        )
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    mapping = manifest["resources_by_placement"]
+    shared = manifest.get("shared_resources", {})
+    blockless: list[str] = []
+    total = 0
+    for provider, placements in mapping.items():
+        declared = _declared_resources(parsed.get(provider, {}))
+        claimed: set[str] = set(shared.get(provider, []))
+        phantom_shared = [a for a in claimed if a not in declared]
+        if phantom_shared:
+            raise TerraformError(
+                f"{provider}: shared resources {phantom_shared} are in the "
+                "manifest but not in the parsed files"
+            )
+        for placement, addresses in placements.items():
+            total += 1
+            claimed.update(addresses)
+            missing_addrs = [a for a in addresses if a not in declared]
+            if missing_addrs:
+                raise TerraformError(
+                    f"{provider}/{placement}: manifest claims {missing_addrs} "
+                    "but the parsed files declare no such resource"
+                )
+            if not addresses:
+                blockless.append(f"{provider}/{placement}")
+        unclaimed = declared - claimed
+        if unclaimed:
+            raise TerraformError(
+                f"{provider}: resources {sorted(unclaimed)} are declared in the "
+                "files and claimed by no placement in the manifest"
+            )
+    return tuple(sorted(blockless)), total
 
 
 if __name__ == "__main__":

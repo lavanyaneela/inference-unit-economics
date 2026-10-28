@@ -131,6 +131,9 @@ METRICS: tuple[Metric, ...] = (
     Metric("tf_unrepresentable", "e5_terraform_coverage",
            ("structurally_unrepresentable_count",), as_int,
            ("{} cannot appear", "other {} have no", "The {} structurally")),
+    Metric("blockless_placements", "e5_terraform_coverage",
+           ("blockless_placements_count",), as_int,
+           ("{} of the 12", "all {} batch")),
     # ------------------------------------------------- the fixtures, the suite
     # The verb "captured" appears in ordinary prose, so the anchors carry a
     # second fixed word; a bare "captured {}" matched "captured per machine".

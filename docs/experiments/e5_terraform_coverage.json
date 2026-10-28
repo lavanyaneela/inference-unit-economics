@@ -50,5 +50,12 @@
   "structurally_unrepresentable_count": 17,
   "quantities_total": 23,
   "attribute_paths_total": 162,
+  "blockless_placements": [
+    "aws/batch",
+    "azure/batch",
+    "gcp/batch"
+  ],
+  "blockless_placements_count": 3,
+  "placements_total": 12,
   "experiment": "e5_terraform_coverage"
 }
