@@ -1,0 +1,178 @@
+{
+  "metrics": {
+    "serving_rps": 93103.86,
+    "serving_band_pct": 16.58,
+    "serving_range_pct": 46.21,
+    "profile_trials": 25,
+    "batch_rps": 306284.09,
+    "batch_best_size": 128,
+    "aws_billing_inflation": 93.10386,
+    "gcp_billing_inflation": 9310.386,
+    "batch_setup_share_pct": 98.65786551419475,
+    "payload_over_compute_ratio": 1.8431999999999997,
+    "cheapest_interactive_name": "aws/serverless",
+    "cheapest_per_million_usd": 0.113728,
+    "worst_best_ratio": 4399.810440739583,
+    "gcp_flip_rps": 9.217171717171716,
+    "aws_flip_rps": 280.88460576502223,
+    "flip_ratio": 30.47405585834214,
+    "leader_change_rps": 120.6582567373226,
+    "gcp_zone_lo_rps": 8.379247015610652,
+    "gcp_zone_hi_rps": 10.138888888888891,
+    "zone_span_ratio": 1.2100000000000002,
+    "reference_margin": 24.131651347464516,
+    "tf_attr_paths": 162,
+    "tf_quantities_total": 23,
+    "tf_representable": 6,
+    "tf_unrepresentable": 17,
+    "capture_date": "2026-10-28",
+    "tests_total": 140,
+    "coverage_line_pct": 98.11946902654867
+  },
+  "rendered": {
+    "serving_rps": "93,104",
+    "serving_band_pct": "16.6",
+    "serving_range_pct": "46.2",
+    "profile_trials": "25",
+    "batch_rps": "306,284",
+    "batch_best_size": "128",
+    "aws_billing_inflation": "93",
+    "gcp_billing_inflation": "9,310",
+    "batch_setup_share_pct": "98.66",
+    "payload_over_compute_ratio": "1.8",
+    "cheapest_interactive_name": "aws/serverless",
+    "cheapest_per_million_usd": "0.11",
+    "worst_best_ratio": "4,400",
+    "gcp_flip_rps": "9.2",
+    "aws_flip_rps": "280.9",
+    "flip_ratio": "30.5",
+    "leader_change_rps": "120.7",
+    "gcp_zone_lo_rps": "8.38",
+    "gcp_zone_hi_rps": "10.14",
+    "zone_span_ratio": "1.21",
+    "reference_margin": "24.13",
+    "tf_attr_paths": "162",
+    "tf_quantities_total": "23",
+    "tf_representable": "6",
+    "tf_unrepresentable": "17",
+    "capture_date": "2026-10-28",
+    "tests_total": "140",
+    "coverage_line_pct": "98.1"
+  },
+  "anchors": {
+    "serving_rps": [
+      "sustains {} requests",
+      "{} single row requests"
+    ],
+    "serving_band_pct": [
+      "band of {}%",
+      "{}% band"
+    ],
+    "serving_range_pct": [
+      "range of {}%",
+      "varied by {}%"
+    ],
+    "profile_trials": [
+      "{} short trials"
+    ],
+    "batch_rps": [
+      "{} rows per second"
+    ],
+    "batch_best_size": [
+      "batch size {}"
+    ],
+    "aws_billing_inflation": [
+      "{}x on SageMaker",
+      "{} times its service"
+    ],
+    "gcp_billing_inflation": [
+      "{}x on Cloud Run",
+      "{} times for the"
+    ],
+    "batch_setup_share_pct": [
+      "{}% setup",
+      "setup share of {}%"
+    ],
+    "payload_over_compute_ratio": [
+      "{} times the compute"
+    ],
+    "cheapest_interactive_name": [
+      "cheapest is {}"
+    ],
+    "cheapest_per_million_usd": [
+      "{} per million"
+    ],
+    "worst_best_ratio": [
+      "{}x the cost"
+    ],
+    "gcp_flip_rps": [
+      "crossover at {} requests",
+      "GCP it sits at {}"
+    ],
+    "aws_flip_rps": [
+      "flip at {} requests",
+      "AWS at {}"
+    ],
+    "flip_ratio": [
+      "{}x apart"
+    ],
+    "leader_change_rps": [
+      "above {} requests"
+    ],
+    "gcp_zone_lo_rps": [
+      "between {} and"
+    ],
+    "gcp_zone_hi_rps": [
+      "and {} requests"
+    ],
+    "zone_span_ratio": [
+      "a {}x span"
+    ],
+    "reference_margin": [
+      "margin of {}x"
+    ],
+    "tf_attr_paths": [
+      "{} attribute paths"
+    ],
+    "tf_quantities_total": [
+      "of the {} quantities",
+      "the {} quantities the"
+    ],
+    "tf_representable": [
+      "holds {} of",
+      "represent {} of them"
+    ],
+    "tf_unrepresentable": [
+      "{} cannot appear",
+      "other {} have no",
+      "The {} structurally"
+    ],
+    "capture_date": [
+      "captured {} from",
+      "both captured {}",
+      "profile captured {}",
+      "cards captured {}"
+    ],
+    "tests_total": [
+      "{} tests"
+    ],
+    "coverage_line_pct": [
+      "{}% line coverage"
+    ]
+  },
+  "textual": [
+    "cheapest_interactive_name",
+    "capture_date"
+  ],
+  "checked_documents": [
+    "README.md",
+    "docs/defense-guide.md",
+    "docs/adr/ADR-001-dated-rate-cards-not-live-pricing.md",
+    "docs/adr/ADR-002-terraform-generated-and-parsed-offline.md",
+    "docs/adr/ADR-003-the-duration-trap.md",
+    "docs/adr/ADR-004-placement-taxonomy.md",
+    "docs/adr/ADR-005-what-this-repository-cannot-measure.md"
+  ],
+  "note": "every value here is produced by running the suite and the experiments; tools/check_numbers.py holds the documents to it",
+  "generated_utc": "2026-10-28"
+}
