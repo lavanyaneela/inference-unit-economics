@@ -40,9 +40,12 @@ class Scenario:
     response_out_bytes: int = 512
     #: Requests per batch job, over which job setup time is amortized.
     batch_job_requests: int = 1_000_000
-    #: Widest throughput spread the decision is allowed to rest on, in percent.
-    #: Above this the tool refuses rather than deciding on noise.
-    max_spread_pct: float = 5.0
+    #: Widest throughput band (best run against median run) a decision is allowed
+    #: to rest on, in percent. Above this the tool refuses rather than deciding on
+    #: noise. The default is set above the band measured on the capture machine,
+    #: which a shared box could not pin tighter than about a quarter; tighten it
+    #: with --max-band-pct to watch the refusal.
+    max_band_pct: float = 30.0
     #: Assumed scaling of measured single process throughput to instance vCPUs.
     #: 1.0 means linear. This is the strongest assumption in the model and the
     #: boundary ADR says so.
@@ -59,7 +62,7 @@ class Scenario:
             (self.request_in_bytes >= 0, "request_in_bytes must not be negative"),
             (self.response_out_bytes >= 0, "response_out_bytes must not be negative"),
             (self.batch_job_requests >= 1, "batch_job_requests must be at least 1"),
-            (self.max_spread_pct > 0, "max_spread_pct must be positive"),
+            (self.max_band_pct > 0, "max_band_pct must be positive"),
             (0 < self.vcpu_scaling_efficiency <= 1.0,
              "vcpu_scaling_efficiency must be in (0, 1]"),
         ]

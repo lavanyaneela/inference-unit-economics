@@ -1,0 +1,119 @@
+"""Loads and validates the committed throughput profile.
+
+The profile is the one measured quantity in the repository, so its loader is strict:
+a profile that is missing fields, measured against a different model artifact, or
+internally inconsistent is refused with the reason, because every downstream figure
+silently inherits whatever this file says.
+"""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+
+from ..config import THROUGHPUT_PROFILE
+
+
+class ProfileError(ValueError):
+    """The committed profile cannot be trusted, with the reason."""
+
+
+@dataclass(frozen=True)
+class ThroughputProfile:
+    """The measured service rates the cost model scales from."""
+
+    serving_rps: float
+    serving_band_pct: float
+    serving_range_pct: float
+    batch_rps: float
+    batch_best_size: int
+    batch_band_pct: float
+    batch_range_pct: float
+    captured_utc: str
+    model_sha256: str
+    trials: int
+    raw: dict
+
+    @property
+    def service_ms_per_request(self) -> float:
+        """Single request service time implied by the serving rate."""
+        return 1000.0 / self.serving_rps
+
+    def scaled(self, factor: float) -> ThroughputProfile:
+        """The same profile with throughput moved by a factor. Sensitivity uses this."""
+        if factor <= 0:
+            raise ProfileError("throughput scale factor must be positive")
+        return ThroughputProfile(
+            serving_rps=self.serving_rps * factor,
+            serving_band_pct=self.serving_band_pct,
+            serving_range_pct=self.serving_range_pct,
+            batch_rps=self.batch_rps * factor,
+            batch_best_size=self.batch_best_size,
+            batch_band_pct=self.batch_band_pct,
+            batch_range_pct=self.batch_range_pct,
+            captured_utc=self.captured_utc,
+            model_sha256=self.model_sha256,
+            trials=self.trials,
+            raw=self.raw,
+        )
+
+
+REQUIRED = (
+    "schema", "captured_utc", "model_sha256", "trials", "batch_sizes",
+    "serving_rps", "serving_band_pct", "serving_range_pct", "batch_rps",
+    "batch_best_size", "batch_band_pct", "batch_range_pct",
+)
+
+
+def load_profile(path: Path = THROUGHPUT_PROFILE,
+                 expected_model_sha256: str | None = None) -> ThroughputProfile:
+    if not path.exists():
+        raise ProfileError(
+            f"no throughput profile at {path}. Run `make profile` to measure this "
+            "machine, or restore the committed fixture."
+        )
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    missing = [key for key in REQUIRED if key not in raw]
+    if missing:
+        raise ProfileError(f"profile is missing fields: {missing}")
+    if raw["schema"] != 1:
+        raise ProfileError(f"profile schema {raw['schema']} is not supported")
+    if expected_model_sha256 and raw["model_sha256"] != expected_model_sha256:
+        raise ProfileError(
+            "profile was measured against a different model artifact: profile has "
+            f"{raw['model_sha256'][:12]}..., the committed model is "
+            f"{expected_model_sha256[:12]}... Re-run `make profile`."
+        )
+    for size, entry in raw["batch_sizes"].items():
+        runs = entry.get("runs_rps", [])
+        if len(runs) != raw["trials"]:
+            raise ProfileError(
+                f"batch size {size} records {len(runs)} runs but the profile claims "
+                f"{raw['trials']} trials"
+            )
+        if entry["best_rps"] != max(runs):
+            raise ProfileError(
+                f"batch size {size}: best_rps does not equal the best recorded run. "
+                "The profile has been edited by hand."
+            )
+    if raw["serving_rps"] <= 0 or raw["batch_rps"] <= 0:
+        raise ProfileError("profile rates must be positive")
+    if raw["batch_rps"] < raw["serving_rps"]:
+        raise ProfileError(
+            "batch rate below single request rate: the profile is inconsistent "
+            "with how batching works and was probably truncated"
+        )
+    return ThroughputProfile(
+        serving_rps=float(raw["serving_rps"]),
+        serving_band_pct=float(raw["serving_band_pct"]),
+        serving_range_pct=float(raw["serving_range_pct"]),
+        batch_rps=float(raw["batch_rps"]),
+        batch_best_size=int(raw["batch_best_size"]),
+        batch_band_pct=float(raw["batch_band_pct"]),
+        batch_range_pct=float(raw["batch_range_pct"]),
+        captured_utc=str(raw["captured_utc"]),
+        model_sha256=str(raw["model_sha256"]),
+        trials=int(raw["trials"]),
+        raw=raw,
+    )
