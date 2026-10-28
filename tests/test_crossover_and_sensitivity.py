@@ -137,3 +137,29 @@ def test_no_refusal_when_the_band_is_inside_the_ceiling():
 def test_the_refusal_message_names_a_path_forward():
     message = refuses(Scenario(max_band_pct=1.0), make_profile(band_pct=16.0))
     assert "make profile" in message
+
+
+def test_a_floored_autoscaled_and_dedicated_pair_are_co_winners_not_rivals():
+    """At the floor the two placements are one spend with two names. The first
+    version treated them as winner and runner up, which held the margin at 1.00x
+    forever and made a decision against serverless structurally impossible
+    inside a single provider."""
+    cards = _cards()
+    profile = make_profile(serving_rps=1000.0)
+    sens = analyse(cards, Scenario(traffic_rps=100.0), profile,
+                   within=("p/serverless", "p/realtime_autoscaled",
+                           "p/realtime_dedicated"))
+    assert set(sens.co_winners) == {"p/realtime_autoscaled", "p/realtime_dedicated"}
+    assert sens.runner_up == "p/serverless"
+    assert sens.margin_ratio > 1.1
+    assert sens.decided
+
+
+def test_a_dead_heat_on_the_crossover_is_undecided_not_an_error():
+    cards = _cards()
+    profile = make_profile(serving_rps=1000.0)
+    crossover_rps = 0.36 / 3600 / (0.1 * 2.0 * 0.00002)
+    sens = analyse(cards, Scenario(traffic_rps=crossover_rps), profile,
+                   within=("p/serverless", "p/realtime_autoscaled"))
+    assert sens.margin_ratio == pytest.approx(1.0)
+    assert not sens.decided

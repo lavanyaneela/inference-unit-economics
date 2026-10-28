@@ -1,0 +1,38 @@
+{
+  "experiment": "e1_throughput_profile",
+  "captured_utc": "2026-10-28",
+  "trials": 25,
+  "serving_rps": 93103.86,
+  "serving_band_pct": 16.58,
+  "serving_range_pct": 46.21,
+  "batch_rps": 306284.09,
+  "batch_best_size": 128,
+  "batch_band_pct": 27.35,
+  "batch_range_pct": 50.64,
+  "by_batch_size": {
+    "1": {
+      "best_rps": 93103.86,
+      "median_rps": 79861.78,
+      "band_pct": 16.58,
+      "range_pct": 46.21
+    },
+    "8": {
+      "best_rps": 225389.36,
+      "median_rps": 191452.3,
+      "band_pct": 17.73,
+      "range_pct": 35.49
+    },
+    "32": {
+      "best_rps": 276846.77,
+      "median_rps": 227556.15,
+      "band_pct": 21.66,
+      "range_pct": 36.26
+    },
+    "128": {
+      "best_rps": 306284.09,
+      "median_rps": 240505.47,
+      "band_pct": 27.35,
+      "range_pct": 50.64
+    }
+  }
+}

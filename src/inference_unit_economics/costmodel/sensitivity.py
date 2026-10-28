@@ -28,6 +28,9 @@ class Sensitivity:
     """How far throughput must move before the cheapest line changes."""
 
     winner: str
+    #: Lines priced identically to the winner, the winner included. At the
+    #: autoscale floor, autoscaled and dedicated are one spend with two names.
+    co_winners: tuple[str, ...]
     runner_up: str
     margin_ratio: float
     #: Smallest relative throughput move that flips the decision, in percent.
@@ -55,13 +58,29 @@ class Sensitivity:
         return self.flip_outside_band and self.margin_meaningful
 
 
-def _winner_at(cards: dict[str, RateCard], scenario: Scenario,
-               profile: ThroughputProfile, factor: float,
-               within: tuple[str, ...] | None = None) -> str:
+#: Two lines closer than this, as a relative gap, are the same bill: a floored
+#: autoscaled endpoint and a dedicated one at night are one spend wearing two
+#: names, and treating them as rivals made the margin test unpassable forever.
+TIE_REL_TOL = 1e-9
+
+
+def _split_ties(lines) -> tuple[list, list]:
+    """The co-winner group, then everything priced distinctly above it."""
+    head = lines[0].usd_per_1k
+    winners = [line for line in lines
+               if abs(line.usd_per_1k - head) <= TIE_REL_TOL * max(head, 1e-30)]
+    rest = lines[len(winners):]
+    return winners, rest
+
+
+def _winners_at(cards: dict[str, RateCard], scenario: Scenario,
+                profile: ThroughputProfile, factor: float,
+                within: tuple[str, ...] | None = None) -> frozenset[str]:
     lines = cost_all_safe(cards, scenario, profile.scaled(factor))
     if within is not None:
         lines = [line for line in lines if line.key in within]
-    return lines[0].key
+    winners, _ = _split_ties(lines)
+    return frozenset(line.key for line in winners)
 
 
 def analyse(cards: dict[str, RateCard], scenario: Scenario,
@@ -72,11 +91,23 @@ def analyse(cards: dict[str, RateCard], scenario: Scenario,
         lines = [line for line in lines if line.key in within]
     if len(lines) < 2:
         raise ValueError("sensitivity needs at least two priceable lines to compare")
-    winner, runner_up = lines[0], lines[1]
-    margin = runner_up.usd_per_1k / winner.usd_per_1k if winner.usd_per_1k else float("inf")
-    flip_pct, direction = _nearest_flip(cards, scenario, profile, winner.key, within)
+    winners, rest = _split_ties(lines)
+    winner = winners[0]
+    if rest:
+        runner_up = rest[0]
+        margin = (runner_up.usd_per_1k / winner.usd_per_1k
+                  if winner.usd_per_1k else float("inf"))
+    else:
+        # Every line in the race is the same bill, which happens exactly on a
+        # crossover. A dead heat is the most undecided a comparison gets, so the
+        # margin is parity and the floor turns it into exit 1.
+        runner_up = winners[1]
+        margin = 1.0
+    flip_pct, direction = _nearest_flip(
+        cards, scenario, profile, frozenset(w.key for w in winners), within)
     return Sensitivity(
         winner=winner.key,
+        co_winners=tuple(w.key for w in winners),
         runner_up=runner_up.key,
         margin_ratio=margin,
         flip_move_pct=flip_pct,
@@ -86,19 +117,25 @@ def analyse(cards: dict[str, RateCard], scenario: Scenario,
     )
 
 
-def _nearest_flip(cards, scenario, profile, winner_key: str,
+def _nearest_flip(cards, scenario, profile, winner_keys: frozenset[str],
                   within: tuple[str, ...] | None = None
                   ) -> tuple[float | None, str | None]:
-    """Bisect toward 1.0 from each side for the closest factor that dethrones
-    the winner. Returned as a percent move, slower or faster."""
+    """Bisect toward 1.0 from each side for the closest factor at which the
+    cheapest line falls outside the current co-winner set. Returned as a percent
+    move, slower or faster."""
+
+    def holds(factor: float) -> bool:
+        return bool(_winners_at(cards, scenario, profile, factor, within)
+                    & winner_keys)
+
     best: tuple[float, str] | None = None
     for direction, outer in (("slower", 1.0 / SEARCH_SPAN), ("faster", SEARCH_SPAN)):
-        if _winner_at(cards, scenario, profile, outer, within) == winner_key:
+        if holds(outer):
             continue
         inner = 1.0
         for _ in range(60):
             mid = (inner * outer) ** 0.5
-            if _winner_at(cards, scenario, profile, mid, within) == winner_key:
+            if holds(mid):
                 inner = mid
             else:
                 outer = mid

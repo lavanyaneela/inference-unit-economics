@@ -1,0 +1,196 @@
+{
+  "experiment": "e2_cost_table",
+  "scenario_traffic_rps": 5.0,
+  "lines": [
+    {
+      "key": "gcp/batch",
+      "service": "Vertex AI batch prediction",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 3.6996543367085548e-06,
+      "components": {
+        "instance_hours_running": 4.9654336708554896e-08,
+        "instance_hours_setup": 3.6499999999999998e-06
+      },
+      "detail": {
+        "instance": "n1-standard-2",
+        "job_run_s": 1.6324713438429008,
+        "setup_share": 0.9865786551419475
+      }
+    },
+    {
+      "key": "aws/batch",
+      "service": "SageMaker Batch Transform",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 3.88548172348387e-06,
+      "components": {
+        "instance_hours_running": 5.214839015053711e-08,
+        "instance_hours_setup": 3.833333333333334e-06
+      },
+      "detail": {
+        "instance": "ml.m5.large",
+        "job_run_s": 1.6324713438429008,
+        "setup_share": 0.9865786551419476
+      }
+    },
+    {
+      "key": "azure/batch",
+      "service": "Azure ML compute cluster batch job",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 9.83309918107583e-06,
+      "components": {
+        "instance_hours_running": 6.643251440916249e-08,
+        "instance_hours_setup": 9.766666666666667e-06
+      },
+      "detail": {
+        "instance": "Standard_DS3_v2",
+        "job_run_s": 0.8162356719214504,
+        "setup_share": 0.993243990202294
+      }
+    },
+    {
+      "key": "aws/serverless",
+      "service": "SageMaker Serverless Inference",
+      "billing_unit": "request_compute",
+      "usd_per_1k": 0.00011372799999999999,
+      "components": {
+        "request_compute": 4e-05,
+        "request_fee": 0.0,
+        "data_processing": 7.3728e-05
+      },
+      "detail": {
+        "service_ms": 0.010740693243008399,
+        "billed_ms": 1.0,
+        "billing_inflation": 93.10386
+      }
+    },
+    {
+      "key": "azure/serverless",
+      "service": "Azure Container Instances",
+      "billing_unit": "container_group_hour",
+      "usd_per_1k": 0.0027444444444444443,
+      "components": {
+        "group_hours": 0.0027444444444444443
+      },
+      "detail": {
+        "scale_to_zero": false,
+        "usd_per_hour": 0.0494,
+        "capacity_rps": 93103.86
+      }
+    },
+    {
+      "key": "gcp/serverless",
+      "service": "Cloud Run, request-based billing",
+      "billing_unit": "request_compute",
+      "usd_per_1k": 0.0033,
+      "components": {
+        "request_compute": 0.0029000000000000002,
+        "request_fee": 0.0004,
+        "data_processing": 0.0
+      },
+      "detail": {
+        "service_ms": 0.010740693243008399,
+        "billed_ms": 100.0,
+        "billing_inflation": 9310.386
+      }
+    },
+    {
+      "key": "gcp/realtime_dedicated",
+      "service": "Vertex AI online prediction endpoint",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 0.006083333333333333,
+      "components": {
+        "instance_hours": 0.006083333333333333
+      },
+      "detail": {
+        "instance": "n1-standard-2",
+        "instance_count": 1,
+        "capacity_rps": 186207.72
+      }
+    },
+    {
+      "key": "gcp/realtime_autoscaled",
+      "service": "Vertex AI online prediction endpoint with autoscaling",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 0.006083333333333333,
+      "components": {
+        "instance_hours": 0.006083333333333333
+      },
+      "detail": {
+        "instance": "n1-standard-2",
+        "instance_count_mean": 1.0,
+        "capacity_rps": 186207.72,
+        "floored_at_min": true
+      }
+    },
+    {
+      "key": "aws/realtime_dedicated",
+      "service": "SageMaker real-time endpoint",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 0.006388888888888889,
+      "components": {
+        "instance_hours": 0.006388888888888889
+      },
+      "detail": {
+        "instance": "ml.m5.large",
+        "instance_count": 1,
+        "capacity_rps": 186207.72
+      }
+    },
+    {
+      "key": "aws/realtime_autoscaled",
+      "service": "SageMaker real-time endpoint with application autoscaling",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 0.006388888888888889,
+      "components": {
+        "instance_hours": 0.006388888888888889
+      },
+      "detail": {
+        "instance": "ml.m5.large",
+        "instance_count_mean": 1.0,
+        "capacity_rps": 186207.72,
+        "floored_at_min": true
+      }
+    },
+    {
+      "key": "azure/realtime_dedicated",
+      "service": "Azure ML managed online endpoint",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 0.016277777777777776,
+      "components": {
+        "instance_hours": 0.016277777777777776
+      },
+      "detail": {
+        "instance": "Standard_DS3_v2",
+        "instance_count": 1,
+        "capacity_rps": 372415.44
+      }
+    },
+    {
+      "key": "azure/realtime_autoscaled",
+      "service": "Azure ML managed online endpoint with autoscaling",
+      "billing_unit": "instance_hour",
+      "usd_per_1k": 0.016277777777777776,
+      "components": {
+        "instance_hours": 0.016277777777777776
+      },
+      "detail": {
+        "instance": "Standard_DS3_v2",
+        "instance_count_mean": 1.0,
+        "capacity_rps": 372415.44,
+        "floored_at_min": true
+      }
+    }
+  ],
+  "cheapest_interactive_key": "aws/serverless",
+  "cheapest_interactive_usd_per_million": 0.113728,
+  "worst_to_best_ratio_interactive": 143.12902519852435,
+  "worst_to_best_ratio_all": 4399.810440739583,
+  "billing_inflation_by_provider": {
+    "aws": 93.10386,
+    "gcp": 9310.386
+  },
+  "cheapest_batch_key": "gcp/batch",
+  "batch_setup_share_pct": 98.65786551419475,
+  "aws_serverless_data_exceeds_compute": true,
+  "aws_serverless_data_over_compute_ratio": 1.8431999999999997
+}

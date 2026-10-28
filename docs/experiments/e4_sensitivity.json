@@ -1,0 +1,26 @@
+{
+  "experiment": "e4_sensitivity",
+  "reference_traffic_rps": 5.0,
+  "reference": {
+    "winner": "aws/serverless",
+    "runner_up": "azure/serverless",
+    "margin_ratio": 24.131651347464516,
+    "flip_move_pct": null,
+    "band_pct": 16.58,
+    "decided": true
+  },
+  "undecided_zone_by_provider": {
+    "aws": {
+      "lo_rps": 255.34964160456562,
+      "hi_rps": 308.9730663415245,
+      "span_ratio": 1.2100000000000004
+    },
+    "azure": null,
+    "gcp": {
+      "lo_rps": 8.379247015610652,
+      "hi_rps": 10.138888888888891,
+      "span_ratio": 1.2100000000000002
+    }
+  },
+  "margin_floor": 1.1
+}

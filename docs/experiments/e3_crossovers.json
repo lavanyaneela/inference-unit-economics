@@ -1,0 +1,21 @@
+{
+  "experiment": "e3_crossovers",
+  "serverless_to_autoscaled_rps": {
+    "aws": 280.88460576502223,
+    "azure": null,
+    "gcp": 9.217171717171716
+  },
+  "aws_over_gcp_flip_ratio": 30.47405585834214,
+  "azure_flip_exists_in_range": false,
+  "interactive_leader_changes": [
+    {
+      "rps": 120.6582567373226,
+      "below": "aws/serverless",
+      "above": "azure/serverless"
+    }
+  ],
+  "sweep_range_rps": [
+    0.01,
+    2000.0
+  ]
+}

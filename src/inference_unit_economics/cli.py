@@ -108,6 +108,7 @@ def cmd_decide(args: argparse.Namespace) -> int:
         "latency": args.latency,
         "providers": sorted(cards),
         "winner": sens.winner,
+        "co_winners": list(sens.co_winners),
         "runner_up": sens.runner_up,
         "margin_ratio": round(sens.margin_ratio, 4),
         "flip_move_pct": None if sens.flip_move_pct is None else round(sens.flip_move_pct, 2),
@@ -121,6 +122,8 @@ def cmd_decide(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps(verdict, indent=2))
     elif sens.decided:
+        tie = ("" if len(sens.co_winners) == 1 else
+               " (tied to the dollar with " + ", ".join(sens.co_winners[1:]) + ")")
         flip = (
             "no throughput inside the searched span changes the leader"
             if sens.flip_move_pct is None
@@ -129,7 +132,7 @@ def cmd_decide(args: argparse.Namespace) -> int:
         )
         print(
             f"decided: at {scenario.traffic_rps:g} requests per second ({args.latency}), "
-            f"{sens.winner} is cheapest at {_fmt_usd(lines[0].usd_per_1k)} per 1k "
+            f"{sens.winner}{tie} is cheapest at {_fmt_usd(lines[0].usd_per_1k)} per 1k "
             f"inferences, {sens.margin_ratio:.2f}x under {sens.runner_up}. {flip}. "
             f"Rate cards captured {next(iter(cards.values())).captured_utc}; profile "
             f"captured {profile.captured_utc}."
