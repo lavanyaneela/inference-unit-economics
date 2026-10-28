@@ -46,6 +46,11 @@ class Scenario:
     #: which a shared box could not pin tighter than about a quarter; tighten it
     #: with --max-band-pct to watch the refusal.
     max_band_pct: float = 30.0
+    #: Smallest winning margin, as a ratio, that counts as a decision. Rate cards
+    #: round to tenths of a cent and every scenario input is declared, so a winner
+    #: by less than this is inside the precision of the inputs and the tool says
+    #: "either choice is defensible" instead of printing a winner.
+    min_margin_ratio: float = 1.10
     #: Assumed scaling of measured single process throughput to instance vCPUs.
     #: 1.0 means linear. This is the strongest assumption in the model and the
     #: boundary ADR says so.
@@ -63,6 +68,7 @@ class Scenario:
             (self.response_out_bytes >= 0, "response_out_bytes must not be negative"),
             (self.batch_job_requests >= 1, "batch_job_requests must be at least 1"),
             (self.max_band_pct > 0, "max_band_pct must be positive"),
+            (self.min_margin_ratio >= 1.0, "min_margin_ratio must be at least 1.0"),
             (0 < self.vcpu_scaling_efficiency <= 1.0,
              "vcpu_scaling_efficiency must be in (0, 1]"),
         ]

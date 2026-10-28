@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset='utf-8'><title>inference-unit-economics report</title><style>
+body { font-family: Georgia, 'Times New Roman', serif; margin: 2rem auto;
+       max-width: 62rem; color: #1a1a1a; background: #fcfcfa; line-height: 1.5; }
+h1, h2 { font-weight: 600; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid #1a1a1a; padding-bottom: .4rem; }
+h2 { font-size: 1.15rem; margin-top: 2.2rem; }
+table { border-collapse: collapse; width: 100%; margin: .8rem 0; font-size: .92rem; }
+th, td { border: 1px solid #c8c8c0; padding: .35rem .6rem; text-align: left; }
+th { background: #efefe8; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.winner td { background: #eaf3ea; font-weight: 600; }
+.badge { display: inline-block; padding: .25rem .7rem; border-radius: .3rem;
+         font-weight: 700; color: #ffffff; }
+.badge-decided { background: #1e6e34; }
+.badge-undecided { background: #8a6d00; }
+.badge-refused { background: #8a1f1f; }
+.meta { color: #555550; font-size: .85rem; }
+.callout { border-left: 4px solid #8a1f1f; background: #f6eeee; padding: .6rem .9rem;
+           margin: .9rem 0; }
+</style></head><body><h1>inference-unit-economics report</h1><p class='meta'>Scenario: 5 requests per second, interactive latency class. Rate cards captured: AWS 2026-10-28, Microsoft Azure 2026-10-28, Google Cloud 2026-10-28. Throughput profile captured 2026-10-28.</p><p><span class='badge badge-refused'>REFUSED</span></p><div class='callout'>refused: the measured throughput band is 16.6% (best run against median run) and the scenario allows at most 10.0%. No cost conclusion survives a band that wide. To stabilise it: run `make profile` on an unloaded machine, pin the process to an isolated core, or raise --max-band-pct if a decision at this resolution is genuinely acceptable.</div><h2>What the Terraform cannot represent</h2><p>The generated definitions hold 162 attribute paths and 6 of the 23 quantities the bill consumes.</p><div class='callout'>Unrepresentable anywhere in the files: instance_usd_per_hour, capacity_rps, traffic_rps, peak_rps, service_duration_ms, billed_duration_ms, billing_increment_ms, usd_per_gb_second, usd_per_vcpu_second, usd_per_million_requests, data_gb_per_request, usd_per_gb_data_processed, usd_per_vcpu_hour, usd_per_gb_hour, batch_rps, batch_job_requests, job_setup_billed_s</div></body></html>

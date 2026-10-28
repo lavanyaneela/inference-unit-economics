@@ -36,11 +36,23 @@ class Sensitivity:
     flip_direction: str | None
     #: The measured band the flip must be compared against.
     band_pct: float
+    #: The declared margin floor from the scenario.
+    margin_floor: float
+
+    @property
+    def flip_outside_band(self) -> bool:
+        return self.flip_move_pct is None or self.flip_move_pct > self.band_pct
+
+    @property
+    def margin_meaningful(self) -> bool:
+        return self.margin_ratio >= self.margin_floor
 
     @property
     def decided(self) -> bool:
-        """True when the winner survives every throughput inside the band."""
-        return self.flip_move_pct is None or self.flip_move_pct > self.band_pct
+        """A decision needs both: the winner survives every throughput inside the
+        measured band, and it wins by more than the precision of the inputs. A
+        0.3 percent lead between two rate card prices is not a finding."""
+        return self.flip_outside_band and self.margin_meaningful
 
 
 def _winner_at(cards: dict[str, RateCard], scenario: Scenario,
@@ -70,6 +82,7 @@ def analyse(cards: dict[str, RateCard], scenario: Scenario,
         flip_move_pct=flip_pct,
         flip_direction=direction,
         band_pct=profile.serving_band_pct,
+        margin_floor=scenario.min_margin_ratio,
     )
 
 

@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset='utf-8'><title>inference-unit-economics report</title><style>
+body { font-family: Georgia, 'Times New Roman', serif; margin: 2rem auto;
+       max-width: 62rem; color: #1a1a1a; background: #fcfcfa; line-height: 1.5; }
+h1, h2 { font-weight: 600; }
+h1 { font-size: 1.6rem; border-bottom: 2px solid #1a1a1a; padding-bottom: .4rem; }
+h2 { font-size: 1.15rem; margin-top: 2.2rem; }
+table { border-collapse: collapse; width: 100%; margin: .8rem 0; font-size: .92rem; }
+th, td { border: 1px solid #c8c8c0; padding: .35rem .6rem; text-align: left; }
+th { background: #efefe8; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.winner td { background: #eaf3ea; font-weight: 600; }
+.badge { display: inline-block; padding: .25rem .7rem; border-radius: .3rem;
+         font-weight: 700; color: #ffffff; }
+.badge-decided { background: #1e6e34; }
+.badge-undecided { background: #8a6d00; }
+.badge-refused { background: #8a1f1f; }
+.meta { color: #555550; font-size: .85rem; }
+.callout { border-left: 4px solid #8a1f1f; background: #f6eeee; padding: .6rem .9rem;
+           margin: .9rem 0; }
+</style></head><body><h1>inference-unit-economics report</h1><p class='meta'>Scenario: 5 requests per second, interactive latency class. Rate cards captured: AWS 2026-10-28, Microsoft Azure 2026-10-28, Google Cloud 2026-10-28. Throughput profile captured 2026-10-28.</p><p><span class='badge badge-decided'>DECIDED</span></p><p><strong>aws/serverless</strong> is cheapest at $0.000114 per 1,000 inferences, 24.13x under azure/serverless, and stays cheapest across the measured 16.6% band.</p><h2>Cost per 1,000 inferences</h2><table><tr><th>placement</th><th>service</th><th>billing unit</th><th>usd per 1k</th></tr><tr class='winner'><td>aws/serverless</td><td>SageMaker Serverless Inference</td><td>request_compute</td><td class='num'>$0.000114</td></tr><tr><td>azure/serverless</td><td>Azure Container Instances</td><td>container_group_hour</td><td class='num'>$0.002744</td></tr><tr><td>gcp/serverless</td><td>Cloud Run, request-based billing</td><td>request_compute</td><td class='num'>$0.003300</td></tr><tr><td>gcp/realtime_dedicated</td><td>Vertex AI online prediction endpoint</td><td>instance_hour</td><td class='num'>$0.006083</td></tr><tr><td>gcp/realtime_autoscaled</td><td>Vertex AI online prediction endpoint with autoscaling</td><td>instance_hour</td><td class='num'>$0.006083</td></tr><tr><td>aws/realtime_dedicated</td><td>SageMaker real-time endpoint</td><td>instance_hour</td><td class='num'>$0.006389</td></tr><tr><td>aws/realtime_autoscaled</td><td>SageMaker real-time endpoint with application autoscaling</td><td>instance_hour</td><td class='num'>$0.006389</td></tr><tr><td>azure/realtime_dedicated</td><td>Azure ML managed online endpoint</td><td>instance_hour</td><td class='num'>$0.016278</td></tr><tr><td>azure/realtime_autoscaled</td><td>Azure ML managed online endpoint with autoscaling</td><td>instance_hour</td><td class='num'>$0.016278</td></tr></table><h2>Where the cheap choice changes</h2><table><tr><th>requests per second</th><th>cheaper below</th><th>cheaper above</th></tr><tr><td class='num'>120.66</td><td>aws/serverless</td><td>azure/serverless</td></tr></table><h2>Serverless to autoscaled flip, per provider</h2><table><tr><th>provider</th><th>requests per second</th></tr><tr><td>aws</td><td class='num'>280.9</td></tr><tr><td>azure</td><td class='num'>none in range</td></tr><tr><td>gcp</td><td class='num'>9.2</td></tr></table><h2>What the Terraform cannot represent</h2><p>The generated definitions hold 162 attribute paths and 6 of the 23 quantities the bill consumes.</p><div class='callout'>Unrepresentable anywhere in the files: instance_usd_per_hour, capacity_rps, traffic_rps, peak_rps, service_duration_ms, billed_duration_ms, billing_increment_ms, usd_per_gb_second, usd_per_vcpu_second, usd_per_million_requests, data_gb_per_request, usd_per_gb_data_processed, usd_per_vcpu_hour, usd_per_gb_hour, batch_rps, batch_job_requests, job_setup_billed_s</div></body></html>
