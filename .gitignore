@@ -1,0 +1,15 @@
+# Installed and cached state. node_modules is listed before anything installs it,
+# because an earlier repository committed 86MB of it and paid for the cleanup.
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.json
+reports/
+node_modules/
+build/
+dist/
+.venv/
+*.bak
