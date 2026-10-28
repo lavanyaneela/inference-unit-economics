@@ -43,8 +43,11 @@ correctly.
 
 ## The sharpest case
 
-Two placements in the comparison have no resource block at all: a SageMaker Batch
-Transform job and a Vertex AI batch prediction are API calls with lifetimes, not
+The batch placement on every provider, 3 of the 12 lines in the comparison, has
+no resource block at all: a SageMaker Batch Transform job, a Vertex AI batch
+prediction and an Azure ML batch job are API calls with lifetimes, not
 infrastructure. The cheapest lines in E2's table are therefore invisible to the
-artifact an infrastructure review reads, and that absence is generated, parsed
-and counted rather than asserted.
+artifact an infrastructure review reads, and that absence is counted rather
+than asserted: the generator commits a manifest mapping every placement to its
+resource addresses, and the coverage map verifies it against the parsed files
+in both directions before publishing the count.

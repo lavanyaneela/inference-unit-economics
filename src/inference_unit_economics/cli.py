@@ -94,7 +94,7 @@ def cmd_decide(args: argparse.Namespace) -> int:
     scenario = _scenario(args)
     cards = _cards(args)
     profile = _profile(args)
-    refusal = refuses(scenario, profile)
+    refusal = refuses(scenario, profile, include_batch=args.latency == "deferred")
     if refusal:
         print(refusal)
         return EXIT_REFUSED
@@ -164,7 +164,7 @@ def cmd_table(args: argparse.Namespace) -> int:
     scenario = _scenario(args)
     cards = _cards(args)
     profile = _profile(args)
-    refusal = refuses(scenario, profile)
+    refusal = refuses(scenario, profile, include_batch=args.latency == "deferred")
     if refusal:
         print(refusal)
         return EXIT_REFUSED
@@ -203,7 +203,7 @@ def cmd_crossovers(args: argparse.Namespace) -> int:
     scenario = _scenario(args)
     cards = _cards(args)
     profile = _profile(args)
-    refusal = refuses(scenario, profile)
+    refusal = refuses(scenario, profile, include_batch=args.latency == "deferred")
     if refusal:
         print(refusal)
         return EXIT_REFUSED

@@ -5,9 +5,11 @@ one, by measuring the one quantity no rate card can contain.**
 
 [![verify](https://github.com/GITHUB_USERNAME/inference-unit-economics/actions/workflows/ci.yml/badge.svg)](https://github.com/GITHUB_USERNAME/inference-unit-economics/actions/workflows/ci.yml)
 
-A cloud rate card is denominated in instance hours and the work is denominated in
-requests. The two are related only through a utilization curve the rate card
-cannot contain, because that curve belongs to your model and your traffic, so no
+A cloud rate card is denominated in what the provider sells (instance hours,
+container group hours, rounded request milliseconds) and the work is denominated
+in requests. Relating the two takes the one curve no rate card can contain,
+because it belongs to your model and your traffic: how many requests an hour of
+capacity actually serves, and how long one request actually runs. So no
 published pricing can tell you what your model costs to serve. This repository
 measures a local throughput profile once, treats it as a dated input with an
 error band, and derives what the pricing page structurally cannot: dollars per
@@ -28,14 +30,19 @@ the cheap choice changes. Questions it answers that a pricing page cannot:
   per second on GCP and a **flip at 280.9 requests** per second on AWS:
   **30.5x apart**, and nothing the model does moves it. The gap decomposes
   exactly: a **1.05x instance price** difference times a **29.0x per request**
-  cost difference, the second driven by the billing increment and, on AWS, by
-  a payload fee that outweighs the compute. On Azure the flip never arrives in
+  cost difference. The second term is the billing increments' 100x pulled back
+  by everything else in a per request bill: Cloud Run prices its billed
+  millisecond below SageMaker's, AWS adds a payload fee that outweighs its
+  compute, and GCP adds a request fee. On Azure the flip never arrives in
   the swept range.
 - **A fast model is billed for the rounding, not the work.** The committed model
   sustains **93,104 single row requests** per second per process, so one request
-  finishes far inside either provider's billing increment. The rounded bill runs
-  **93x on SageMaker** Serverless and **9,310x on Cloud Run**, and on SageMaker
-  the payload's data processing fee costs **1.8 times the compute**.
+  finishes far inside either provider's billing increment. The billed duration
+  runs **93x on SageMaker** Serverless and **9,310x on Cloud Run** against the
+  measured service time; since fees are not inflated, that lifts the SageMaker whole bill
+  **1.53x** and the Cloud Run **bill to 8.2x** what the unrounded formula
+  would charge. On SageMaker the payload's data processing fee costs
+  **1.8 times the compute**.
 - **The cheapest line is almost no work at all.** Batch wins the deferred table
   outright, and its bill has a **setup share of 98.66%**: the billed 120 second
   setup window dwarfs the work, which finishes in moments at
@@ -46,14 +53,16 @@ the cheap choice changes. Questions it answers that a pricing page cannot:
   16.6%**. The
   tool refuses to decide (exit 2) whenever that band exceeds the scenario's
   ceiling, and around each crossover there is a zone, **a 1.21x span** of
-  traffic, where the honest answer is exit 1: the inputs cannot pick.
+  traffic (the declared margin floor applied on both sides of the flip), where
+  the honest answer is exit 1: no winner clears the floor there.
 
 At the reference scenario of 5 requests per second, interactive, the **cheapest
 is aws/serverless** at **$0.11 per million** inferences with a **margin of
-24.13x** over the runner up, and the full table spans **4,400x the cost** from
-cheapest to dearest line. Every figure above is produced by code in this
+24.13x** over the runner up, and across both latency
+classes the full table spans **4,400x the cost** from cheapest line (a batch
+job) to dearest, **143.1x within the** interactive lines alone. Every bold figure above is produced by code in this
 repository, re-measured by `make verify`, and guarded against the prose by
-`tools/check_numbers.py`: **158 tests**, **98.0% line coverage**, rate cards and
+`tools/check_numbers.py`: **167 tests**, **98.0% line coverage**, rate cards and
 profile **both captured 2026-10-28**.
 
 ## Quickstart
@@ -116,12 +125,14 @@ E2's component breakdown in `docs/experiments/` carries every line.
 ## What the Terraform cannot represent
 
 The cost model tags every priced line with the quantities its formula consumed.
-E5 generates real HCL for each placement, parses it back, and maps each quantity
-against the files: the definitions hold **162 attribute paths** yet **represent
-6 of them**, out of **the 23 quantities the** bill consumes. The **other 17 have
-no** possible home in any resource schema in use: prices, traffic, durations,
-increments, and the batch job's setup window. Two placements, both batch, have
-no resource block at all, because a batch job is an API call with a lifetime
+E5 generates real HCL per provider, parses it back, and maps each quantity
+against the files: the definitions hold **162 attribute paths**, yet of **the
+23 quantities the** bill consumes they **represent 6 of them**. The **other 17
+have no** possible home in any resource schema in use: prices, traffic,
+durations, increments, and the batch job's setup window. And **3 of the 12**
+placements, the batch placement on every provider, have no resource block at
+all, a count the coverage map computes from the generator's own manifest
+against the parsed files, because a batch job is an API call with a lifetime
 rather than infrastructure. The infrastructure definition can be complete and
 the cost still is not in it, which is the unit mismatch this repository exists
 to make countable. `iue coverage` prints the split; ADR-002 names exactly what a

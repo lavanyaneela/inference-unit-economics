@@ -144,7 +144,7 @@ def cost_serverless(card: RateCard, scenario: Scenario,
     Per request offers bill the service duration rounded up to the provider's
     increment. A model faster than the increment is billed for the rounding, not
     for the work, which is where a 100 ms increment quietly multiplies the bill of
-    an 11 microsecond model. While running offers (Azure Container Instances) bill
+    a model that finishes far inside it. While running offers (Azure Container Instances) bill
     the group for its lifetime whether or not a request arrives, so they are priced
     here as the smallest always on unit, and the comparison table says so instead
     of pretending the two shapes are the same product.

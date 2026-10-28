@@ -211,3 +211,28 @@ def test_the_table_prints_the_capture_dates_next_to_the_dollars(capsys):
     out = capsys.readouterr().out
     assert "profile captured" in out
     assert "rate cards captured" in out
+
+
+def test_a_deferred_verdict_is_held_to_the_batch_band(capsys):
+    """The second audit read the fixture: the batch rate's committed band is
+    wider than the serving band, and a deferred decision rests on the batch
+    rate, so applying the serving band to it understated the uncertainty."""
+    main(["decide", "--latency", "deferred", "--json"])
+    verdict = json.loads(capsys.readouterr().out)
+    from inference_unit_economics.bench.profile import load_profile
+
+    profile = load_profile()
+    assert verdict["band_pct"] == max(profile.serving_band_pct,
+                                      profile.batch_band_pct)
+
+
+def test_the_deferred_refusal_uses_the_batch_band_too(capsys):
+    from inference_unit_economics.bench.profile import load_profile
+
+    profile = load_profile()
+    ceiling = (profile.serving_band_pct + profile.batch_band_pct) / 2
+    assert main(["decide", "--max-band-pct", str(ceiling)]) == EXIT_DECIDED
+    capsys.readouterr()
+    code = main(["decide", "--latency", "deferred", "--max-band-pct", str(ceiling)])
+    assert code == EXIT_REFUSED
+    assert "batch throughput band" in capsys.readouterr().out

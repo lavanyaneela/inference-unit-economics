@@ -36,7 +36,10 @@ second at batch size 128) are counts per unit of work. No anchored figure in any
 checked document is a wall clock duration, and `tools/check_durations.py` sweeps
 every tracked file to hold that line.
 
-**The decision must survive the band, and the margin must clear a floor.** Exit 0
+**The decision must survive the band, and the margin must clear a floor.**
+The band applied is the widest one among the measured rates the race consumed:
+a deferred verdict rests on the batch rate, whose committed band on this
+machine is wider than the serving band, and it is held to that wider band. Exit 0
 requires both: no throughput inside the measured band changes the leader, and
 the leader wins by at least the declared 1.10x margin floor. Exit 1 reports
 which condition failed. Exit 2 refuses outright when the band itself exceeds the

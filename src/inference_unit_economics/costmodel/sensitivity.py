@@ -113,9 +113,21 @@ def analyse(cards: dict[str, RateCard], scenario: Scenario,
         margin_ratio=margin,
         flip_move_pct=flip_pct,
         flip_direction=direction,
-        band_pct=profile.serving_band_pct,
+        band_pct=applicable_band(profile, lines),
         margin_floor=scenario.min_margin_ratio,
     )
+
+
+def applicable_band(profile: ThroughputProfile, lines) -> float:
+    """The band a decision must survive is the widest band among the measured
+    rates the race actually consumed. A deferred verdict rests on the batch
+    rate, whose committed band on the capture machine is wider than the
+    serving band, and the first version quietly applied the serving band to
+    both, which an audit caught by reading the fixture."""
+    bands = [profile.serving_band_pct]
+    if any(line.placement == "batch" for line in lines):
+        bands.append(profile.batch_band_pct)
+    return max(bands)
 
 
 def _nearest_flip(cards, scenario, profile, winner_keys: frozenset[str],
@@ -149,17 +161,23 @@ def _nearest_flip(cards, scenario, profile, winner_keys: frozenset[str],
     return best
 
 
-def refuses(scenario: Scenario, profile: ThroughputProfile) -> str | None:
+def refuses(scenario: Scenario, profile: ThroughputProfile,
+            include_batch: bool = False) -> str | None:
     """The exit 2 condition: the band itself is too wide to decide on.
 
     Returns the refusal message, or None when the band is narrow enough to
     proceed. The message says what would need to stabilise, because a refusal
     without a path forward is just an error code.
     """
-    if profile.serving_band_pct <= scenario.max_band_pct:
+    band = profile.serving_band_pct
+    which = "serving"
+    if include_batch and profile.batch_band_pct > band:
+        band = profile.batch_band_pct
+        which = "batch"
+    if band <= scenario.max_band_pct:
         return None
     return (
-        f"refused: the measured throughput band is {profile.serving_band_pct:.1f}% "
+        f"refused: the measured {which} throughput band is {band:.1f}% "
         f"(best run against median run) and the scenario allows at most "
         f"{scenario.max_band_pct:.1f}%. No cost conclusion survives a band that "
         "wide. To stabilise it: run `make profile` on an unloaded machine, pin the "

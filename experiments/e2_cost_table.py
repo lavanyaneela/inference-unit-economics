@@ -29,6 +29,25 @@ def main() -> dict:
     }
     cheapest_batch = min((line for line in lines if line.placement == "batch"),
                          key=lambda line: line.usd_per_1k)
+    # The bill ratio, distinct from the duration ratio: how much larger the
+    # rounded bill is than the same formula fed the measured service time. An
+    # audit caught the prose quoting the duration ratios (93x, 9310x) as "the
+    # rounded bill", which overstates it exactly where fees are not inflated.
+    bill_ratio = {}
+    service_s = profile.service_ms_per_request / 1000.0
+    for line in lines:
+        if line.placement != "serverless" or "billing_inflation" not in line.detail:
+            continue
+        spec = cards[line.provider].placements["serverless"]
+        unrounded_compute = service_s * (
+            scenario.serverless_memory_gb * spec["usd_per_gb_second"]
+            + scenario.serverless_vcpus * spec["usd_per_vcpu_second"])
+        per_request_unrounded = (
+            unrounded_compute
+            + spec["usd_per_million_requests"] / 1_000_000.0
+            + (scenario.request_in_bytes + scenario.response_out_bytes) / 1e9
+            * spec.get("usd_per_gb_data_processed", 0.0))
+        bill_ratio[line.provider] = line.usd_per_1k / (per_request_unrounded * 1000.0)
     data_component = next(
         line.components.get("data_processing", 0.0) for line in lines
         if line.key == "aws/serverless")
@@ -51,6 +70,7 @@ def main() -> dict:
             interactive[-1].usd_per_1k / interactive[0].usd_per_1k,
         "worst_to_best_ratio_all": lines[-1].usd_per_1k / lines[0].usd_per_1k,
         "billing_inflation_by_provider": inflation,
+        "bill_ratio_rounded_over_unrounded": bill_ratio,
         "cheapest_batch_key": cheapest_batch.key,
         "batch_setup_share_pct": cheapest_batch.detail["setup_share"] * 100,
         "aws_serverless_data_exceeds_compute": data_component > compute_component,

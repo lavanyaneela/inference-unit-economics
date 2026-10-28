@@ -8,11 +8,14 @@
     "batch_best_size": 128,
     "aws_billing_inflation": 93.10386,
     "gcp_billing_inflation": 9310.386,
+    "aws_bill_ratio": 1.533598140632281,
+    "gcp_bill_ratio": 8.243580721547826,
     "batch_setup_share_pct": 98.65786551419475,
     "payload_over_compute_ratio": 1.8431999999999997,
     "cheapest_interactive_name": "aws/serverless",
     "cheapest_per_million_usd": 0.113728,
     "worst_best_ratio": 4399.810440739583,
+    "interactive_span": 143.12902519852435,
     "gcp_flip_rps": 9.217171717171716,
     "aws_flip_rps": 280.88460576502223,
     "flip_ratio": 30.47405585834214,
@@ -27,9 +30,10 @@
     "tf_quantities_total": 23,
     "tf_representable": 6,
     "tf_unrepresentable": 17,
+    "blockless_placements": 3,
     "capture_date": "2026-10-28",
-    "tests_total": 158,
-    "coverage_line_pct": 98.0349344978166
+    "tests_total": 167,
+    "coverage_line_pct": 97.9633401221996
   },
   "rendered": {
     "serving_rps": "93,104",
@@ -40,11 +44,14 @@
     "batch_best_size": "128",
     "aws_billing_inflation": "93",
     "gcp_billing_inflation": "9,310",
+    "aws_bill_ratio": "1.53",
+    "gcp_bill_ratio": "8.2",
     "batch_setup_share_pct": "98.66",
     "payload_over_compute_ratio": "1.8",
     "cheapest_interactive_name": "aws/serverless",
     "cheapest_per_million_usd": "0.11",
     "worst_best_ratio": "4,400",
+    "interactive_span": "143.1",
     "gcp_flip_rps": "9.2",
     "aws_flip_rps": "280.9",
     "flip_ratio": "30.5",
@@ -59,8 +66,9 @@
     "tf_quantities_total": "23",
     "tf_representable": "6",
     "tf_unrepresentable": "17",
+    "blockless_placements": "3",
     "capture_date": "2026-10-28",
-    "tests_total": "158",
+    "tests_total": "167",
     "coverage_line_pct": "98.0"
   },
   "anchors": {
@@ -93,6 +101,12 @@
       "{}x on Cloud Run",
       "{} times for the"
     ],
+    "aws_bill_ratio": [
+      "whole bill {}x"
+    ],
+    "gcp_bill_ratio": [
+      "bill to {}x"
+    ],
     "batch_setup_share_pct": [
       "{}% setup",
       "setup share of {}%"
@@ -108,6 +122,9 @@
     ],
     "worst_best_ratio": [
       "{}x the cost"
+    ],
+    "interactive_span": [
+      "{}x within the"
     ],
     "gcp_flip_rps": [
       "crossover at {} requests",
@@ -156,6 +173,10 @@
       "{} cannot appear",
       "other {} have no",
       "The {} structurally"
+    ],
+    "blockless_placements": [
+      "{} of the 12",
+      "all {} batch"
     ],
     "capture_date": [
       "captured {} from",

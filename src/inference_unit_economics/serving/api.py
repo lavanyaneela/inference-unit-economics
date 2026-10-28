@@ -5,8 +5,9 @@ rather than as rows in a table. This is the per request shape: one app factory,
 a single predict route, a genuinely separate batch route (one validation pass,
 one model call for the whole payload), counters, and refusal with a 422 at the
 boundary for anything the model would misread. The throughput profile is not
-measured through this surface, and E1 says so: HTTP framing overhead belongs to
-the server, not to the model the placements are being priced for.
+measured through this surface, on purpose: HTTP framing overhead belongs to
+the server, not to the model the placements are being priced for, and the
+harness calls the runtime directly.
 """
 
 from __future__ import annotations

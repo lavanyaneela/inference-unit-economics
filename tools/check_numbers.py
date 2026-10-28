@@ -41,7 +41,6 @@ EXEMPT_NUMBERS: dict[str, str] = {
     "0": "an exit code",
     "1": "an exit code, an ordinal, and the finest billing increment in a rate card",
     "2": "an exit code, and the serverless memory in GB, a declared input",
-    "3": "an exit code",
     "5": "the reference traffic in requests per second, a declared scenario input",
     "30": "the default band ceiling, a declared scenario input",
     "1.10": "the margin floor, a declared scenario input",

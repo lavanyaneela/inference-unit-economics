@@ -12,8 +12,8 @@ differently in a table and a sentence; small numbers are checked only through
 anchors; and no two metrics may share an anchor, including by containment, which a
 test asserts.
 
-This repository publishes no duration anywhere, so no render function here may be
-fed a millisecond: the throughput profile's rates are requests and rows per
+No anchored metric in this repository is a duration, so no render function here
+may be fed a millisecond: the throughput profile's rates are requests and rows per
 second, which are counts per unit of work, and the band is a percent. A test
 asserts the spec contains no metric whose path ends in a `_ms` field.
 """
@@ -82,6 +82,12 @@ METRICS: tuple[Metric, ...] = (
     Metric("gcp_billing_inflation", "e2_cost_table",
            ("billing_inflation_by_provider", "gcp"), as_int_comma,
            ("{}x on Cloud Run", "{} times for the")),
+    Metric("aws_bill_ratio", "e2_cost_table",
+           ("bill_ratio_rounded_over_unrounded", "aws"), as_2dp,
+           ("whole bill {}x",)),
+    Metric("gcp_bill_ratio", "e2_cost_table",
+           ("bill_ratio_rounded_over_unrounded", "gcp"), as_1dp,
+           ("bill to {}x",)),
     Metric("batch_setup_share_pct", "e2_cost_table", ("batch_setup_share_pct",),
            as_2dp, ("{}% setup", "setup share of {}%")),
     Metric("payload_over_compute_ratio", "e2_cost_table",
@@ -93,6 +99,8 @@ METRICS: tuple[Metric, ...] = (
            ("cheapest_interactive_usd_per_million",), as_2dp, ("{} per million",)),
     Metric("worst_best_ratio", "e2_cost_table", ("worst_to_best_ratio_all",),
            as_int_comma, ("{}x the cost",)),
+    Metric("interactive_span", "e2_cost_table", ("worst_to_best_ratio_interactive",),
+           as_1dp, ("{}x within the",)),
     # ----------------------------------------------------- E3, the crossovers
     Metric("gcp_flip_rps", "e3_crossovers", ("serverless_to_autoscaled_rps", "gcp"),
            as_1dp, ("crossover at {} requests", "it sits at {}")),

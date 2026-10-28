@@ -189,6 +189,10 @@
     "aws": 93.10386,
     "gcp": 9310.386
   },
+  "bill_ratio_rounded_over_unrounded": {
+    "aws": 1.533598140632281,
+    "gcp": 8.243580721547826
+  },
   "cheapest_batch_key": "gcp/batch",
   "batch_setup_share_pct": 98.65786551419475,
   "aws_serverless_data_exceeds_compute": true,

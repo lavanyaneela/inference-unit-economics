@@ -7,8 +7,8 @@ failing the build.
 
 ## The thirty second version
 
-"Cloud pricing is denominated in instance hours and my work is denominated in
-requests, and the utilization curve relating them belongs to the model, not the
+"Cloud pricing is denominated in what the provider sells, instance hours first
+among its units, and my work is denominated in requests, and the utilization curve relating them belongs to the model, not the
 provider, so no pricing page can tell you what serving costs. I measured a real
 model's throughput once, treated it as a dated input with an error band, and
 derived cost per inference across twelve placement lines on three providers.
@@ -36,9 +36,10 @@ times the compute, and on GCP a request fee sits on top. If pushed: the azure
 entry shows the third shape, no crossover in the swept range, because its
 serverless shaped offer is billed while running (ADR-004).
 
-**Claim: the billing increment, not the compute, is the serverless bill: 93x on
-SageMaker and 9,310x on Cloud Run for this model, and on SageMaker the payload
-costs 1.8 times the compute.**
+**Claim: the billed duration, not the work, sets the serverless compute line:
+93x on SageMaker and 9,310x on Cloud Run against the measured service time,
+which lifts the SageMaker whole bill 1.53x and the Cloud Run bill to 8.2x;
+and on SageMaker the payload costs 1.8 times the compute.**
 Prove it: `cd experiments && PYTHONPATH=. python3 e2_cost_table.py`, read the
 component columns. If pushed on "so serverless is bad": no, serverless still
 wins the reference scenario (cheapest is aws/serverless at $0.11 per million,
@@ -65,10 +66,12 @@ scenario knob and the refusal is one flag away.
 23 quantities the bill consumes; the other 17 have no possible home.**
 Prove it: `iue coverage --json`; the mapping table is
 `src/inference_unit_economics/tfgen/coverage.py`, explicit per quantity. If
-pushed on "that is just your generator being thin": the 17 are structural: the
-tuples are empty because no resource schema in use takes a price, a traffic
-rate, a duration or a billing increment, and the two batch placements have no
-resource block to put anything in.
+pushed on "that is just your generator being thin": the counting is mechanical
+and the structural classification is mine, made falsifiable: each of the 17
+carries an empty mapping in coverage.py, and refuting one means naming a
+resource attribute in these schemas that could hold a price, a traffic rate, a
+duration or an increment. The sharpest case is counted, not argued: all 3
+batch placements have no resource block for anything to live in.
 
 ## Questions that are meant to be hard
 
@@ -79,8 +82,8 @@ when the band is too wide, the co-winner handling that a naive argmin gets
 wrong, the undecided zones around each crossover, and the Terraform coverage
 count. Arithmetic does not tell you when not to trust it.
 
-**Your model does eleven microseconds of work. Does any of this transfer to a
-real model?**
+**Your model sustains 93,104 single row requests per second. Does any of this
+transfer to a real, slower model?**
 The machinery transfers unchanged: the profile is a swappable dated input, so
 `make profile` on your model and your box reprices every line. The findings
 scale predictably: a slower model shrinks the billing inflation and moves the
