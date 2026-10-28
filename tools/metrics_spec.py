@@ -95,7 +95,7 @@ METRICS: tuple[Metric, ...] = (
            as_int_comma, ("{}x the cost",)),
     # ----------------------------------------------------- E3, the crossovers
     Metric("gcp_flip_rps", "e3_crossovers", ("serverless_to_autoscaled_rps", "gcp"),
-           as_1dp, ("crossover at {} requests", "GCP it sits at {}")),
+           as_1dp, ("crossover at {} requests", "it sits at {}")),
     Metric("aws_flip_rps", "e3_crossovers", ("serverless_to_autoscaled_rps", "aws"),
            as_1dp, ("flip at {} requests", "AWS at {}")),
     Metric("flip_ratio", "e3_crossovers", ("aws_over_gcp_flip_ratio",), as_1dp,

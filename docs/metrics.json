@@ -26,7 +26,7 @@
     "tf_representable": 6,
     "tf_unrepresentable": 17,
     "capture_date": "2026-10-28",
-    "tests_total": 140,
+    "tests_total": 154,
     "coverage_line_pct": 98.11946902654867
   },
   "rendered": {
@@ -56,7 +56,7 @@
     "tf_representable": "6",
     "tf_unrepresentable": "17",
     "capture_date": "2026-10-28",
-    "tests_total": "140",
+    "tests_total": "154",
     "coverage_line_pct": "98.1"
   },
   "anchors": {
@@ -107,7 +107,7 @@
     ],
     "gcp_flip_rps": [
       "crossover at {} requests",
-      "GCP it sits at {}"
+      "it sits at {}"
     ],
     "aws_flip_rps": [
       "flip at {} requests",

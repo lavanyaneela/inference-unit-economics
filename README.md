@@ -49,7 +49,7 @@ is aws/serverless** at **$0.11 per million** inferences with a **margin of
 24.13x** over the runner up, and the full table spans **4,400x the cost** from
 cheapest to dearest line. Every figure above is produced by code in this
 repository, re-measured by `make verify`, and guarded against the prose by
-`tools/check_numbers.py`: **140 tests**, **98.1% line coverage**, rate cards and
+`tools/check_numbers.py`: **154 tests**, **98.1% line coverage**, rate cards and
 profile **both captured 2026-10-28**.
 
 ## Quickstart

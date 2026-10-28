@@ -47,12 +47,9 @@ EXEMPT_NUMBERS: dict[str, str] = {
     "1.10": "the margin floor, a declared scenario input",
     "100": "the Cloud Run billing increment in ms, a rate card input",
     "120": "the batch job setup window in seconds, a declared rate card input",
-    "2026": "a copyright year",
     "3.11": "the minimum supported Python version",
     "4": "the serving placements per provider and the sensitivity search span",
     "12": "the priced lines in the table: four placements across three providers",
-    "0.40": "the Cloud Run per million requests price, a rate card input",
-    "0.016": "the SageMaker data processing price per GB, a rate card input",
     "43": "the first harness's trial length in ms, quoted as the bug's symptom",
     "1.00": "parity, the margin of an exact tie",
 }
@@ -65,7 +62,7 @@ NUMBER = r"(?<![\w.])(\d[\d,]*(?:\.\d+)?)"
 #: (aws/serverless) and an ISO date with hyphens, and the first slot pattern
 #: matched neither, which made every textual anchor report the next ordinary
 #: word as a stale figure.
-WORD = r"([A-Za-z0-9_][A-Za-z0-9_/.\-]*)"
+WORD = r"([A-Za-z0-9_](?:[A-Za-z0-9_/.\-]*[A-Za-z0-9_])?)"
 
 FENCE = re.compile(r"^```.*?^```", re.MULTILINE | re.DOTALL)
 CODE_SPAN = re.compile(r"`[^`\n]+`")
@@ -238,11 +235,10 @@ def prove(payload: dict) -> int:
     original = readme.read_text(encoding="utf-8")
     metric = "tf_unrepresentable"
     expected = payload["rendered"][metric]
-    match, anchor = None, None
+    match = None
     for candidate in by_name()[metric].anchors:
         match = anchor_pattern(candidate, False).search(original)
         if match is not None:
-            anchor = candidate
             break
     if match is None:
         print(f"cannot prove the checker: the README uses no anchor of {metric}")

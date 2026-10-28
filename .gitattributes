@@ -1,0 +1,5 @@
+fixtures/model/model.onnx binary
+*.png binary
+*.svg text
+*.tf linguist-detectable=true
+*.sql linguist-detectable=true

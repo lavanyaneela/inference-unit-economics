@@ -1,0 +1,28 @@
+{
+  "shots": [
+    {
+      "file": "report-decided.png",
+      "report": "report-decided.html",
+      "framed_from": "inference-unit-economics report",
+      "framed_to": "Where the cheap choice changes",
+      "badge": {
+        "text": "DECIDED",
+        "colour": "rgb(255, 255, 255)",
+        "background": "rgb(30, 110, 52)",
+        "visible": true
+      }
+    },
+    {
+      "file": "report-refused.png",
+      "report": "report-refused.html",
+      "framed_from": "inference-unit-economics report",
+      "framed_to": "What the Terraform cannot represent",
+      "badge": {
+        "text": "REFUSED",
+        "colour": "rgb(255, 255, 255)",
+        "background": "rgb(138, 31, 31)",
+        "visible": true
+      }
+    }
+  ]
+}
