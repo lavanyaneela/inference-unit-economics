@@ -1,10 +1,11 @@
 """Prices the confidence of a decision against the measured throughput band.
 
 The throughput profile is a measurement with a band, so any decision derived from
-it inherits that band. This module asks the only question that matters before
-acting on the comparison: how far would throughput have to move before a different
-line is cheapest? If the answer sits inside the band the machine actually showed,
-the decision is not supported and the CLI says so with exit code 1 instead of
+it inherits that band. This module asks two questions before
+any winner is printed: how far would throughput have to move before a different
+line is cheapest, and does the lead clear the declared margin floor? A flip
+inside the band the machine actually showed, or a lead thinner than the floor,
+means the inputs cannot pick, and the CLI says so with exit code 1 instead of
 printing a winner.
 """
 

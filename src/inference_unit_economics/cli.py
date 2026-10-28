@@ -4,13 +4,13 @@
 | ---- | ------------------------------------------------------------------------ |
 | 0    | Decided. One placement is cheapest and stays cheapest across the whole   |
 |      | measured throughput band. Named, with the margin.                        |
-| 1    | Evaluated, not decided. The cheapest line changes somewhere inside the   |
-|      | measured band, so at this traffic the choice is not supported by the     |
-|      | measurement. The tool worked; the answer is that the data cannot pick.   |
+| 1    | Evaluated, not decided: the cheapest line changes somewhere inside the   |
+|      | measured band, or its lead is thinner than the declared margin floor.    |
+|      | The tool worked; the answer is that the inputs cannot pick.              |
 | 2    | Refused. The measured band itself is wider than the scenario allows, or  |
 |      | the profile cannot be trusted (missing, or measured against a different  |
 |      | model artifact). Prints what would need to stabilise.                    |
-| 3    | Tool error.                                                              |
+| 3    | Tool error, including invalid input (an unknown provider, a bad file).   |
 
 The distinction between 1 and 2 is the point of the repository: 1 is an honest
 answer about this traffic, 2 is a statement that the question cannot be answered
@@ -118,6 +118,8 @@ def cmd_decide(args: argparse.Namespace) -> int:
         "decided": sens.decided,
         "winner_usd_per_1k": lines[0].usd_per_1k,
         "profile_captured_utc": profile.captured_utc,
+        "rate_cards_captured_utc": {
+            name: card.captured_utc for name, card in cards.items()},
     }
     if args.json:
         print(json.dumps(verdict, indent=2))
@@ -167,8 +169,17 @@ def cmd_table(args: argparse.Namespace) -> int:
         print(refusal)
         return EXIT_REFUSED
     lines = cost_all_safe(cards, scenario, profile)
+    within = _keys(cards, args.latency)
+    if within is not None:
+        lines = [line for line in lines if line.key in within]
     if args.json:
-        print(json.dumps([_line_dict(line) for line in lines], indent=2))
+        print(json.dumps({
+            "profile_captured_utc": profile.captured_utc,
+            "rate_cards_captured_utc": {
+                name: card.captured_utc for name, card in cards.items()},
+            "latency": args.latency,
+            "lines": [_line_dict(line) for line in lines],
+        }, indent=2))
         return EXIT_DECIDED
     dates = ", ".join(
         f"{card.display_name} {card.captured_utc}" for card in cards.values())

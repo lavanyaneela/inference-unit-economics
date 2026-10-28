@@ -53,8 +53,25 @@ def test_the_json_verdict_carries_the_decision_and_its_inputs(capsys):
 
 def test_deferred_latency_lets_batch_into_the_race(capsys):
     main(["table", "--latency", "deferred", "--json"])
-    lines = json.loads(capsys.readouterr().out)
-    assert any(line["key"].endswith("/batch") for line in lines)
+    payload = json.loads(capsys.readouterr().out)
+    assert any(line["key"].endswith("/batch") for line in payload["lines"])
+    assert payload["profile_captured_utc"]
+    assert set(payload["rate_cards_captured_utc"]) == {"aws", "azure", "gcp"}
+
+
+def test_interactive_latency_keeps_batch_out_of_the_table_too(capsys):
+    """The help text promised interactive excludes batch, and the second audit
+    found the table accepting the flag and silently ignoring it."""
+    main(["table", "--json"])
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["lines"]
+    assert not any(line["key"].endswith("/batch") for line in payload["lines"])
+
+
+def test_the_decide_json_names_every_capture_date(capsys):
+    main(["decide", "--json"])
+    verdict = json.loads(capsys.readouterr().out)
+    assert set(verdict["rate_cards_captured_utc"]) == {"aws", "azure", "gcp"}
 
 
 def test_interactive_latency_keeps_batch_out_of_the_decision(capsys):
@@ -94,7 +111,7 @@ def test_debug_mode_re_raises_instead_of_translating(tmp_path, monkeypatch):
 
 def test_the_table_lists_every_placement_cheapest_first(capsys):
     assert main(["table", "--latency", "deferred", "--json"]) == EXIT_DECIDED
-    lines = json.loads(capsys.readouterr().out)
+    lines = json.loads(capsys.readouterr().out)["lines"]
     assert len(lines) == 12
     values = [line["usd_per_1k"] for line in lines]
     assert values == sorted(values)
