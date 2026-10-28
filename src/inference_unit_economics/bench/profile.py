@@ -66,8 +66,16 @@ REQUIRED = (
 )
 
 
+#: Sentinel: by default the loader checks the profile against the committed
+#: model manifest. The first version only checked when a caller asked, no
+#: production caller asked, and an audit loaded a profile stamped with 64 zeros
+#: straight through the default path.
+CHECK_COMMITTED_MODEL = "committed"
+
+
 def load_profile(path: Path = THROUGHPUT_PROFILE,
-                 expected_model_sha256: str | None = None) -> ThroughputProfile:
+                 expected_model_sha256: str | None = CHECK_COMMITTED_MODEL
+                 ) -> ThroughputProfile:
     if not path.exists():
         raise ProfileError(
             f"no throughput profile at {path}. Run `make profile` to measure this "
@@ -79,6 +87,14 @@ def load_profile(path: Path = THROUGHPUT_PROFILE,
         raise ProfileError(f"profile is missing fields: {missing}")
     if raw["schema"] != 1:
         raise ProfileError(f"profile schema {raw['schema']} is not supported")
+    if expected_model_sha256 == CHECK_COMMITTED_MODEL:
+        from ..config import MODEL_MANIFEST
+
+        if MODEL_MANIFEST.exists():
+            expected_model_sha256 = json.loads(
+                MODEL_MANIFEST.read_text(encoding="utf-8"))["sha256"]
+        else:
+            expected_model_sha256 = None
     if expected_model_sha256 and raw["model_sha256"] != expected_model_sha256:
         raise ProfileError(
             "profile was measured against a different model artifact: profile has "
@@ -123,13 +139,25 @@ def load_profile(path: Path = THROUGHPUT_PROFILE,
                 f"{key} says {raw[key]!r} but batch size 1 gives {serving[top]!r}. "
                 "The top level summary has been edited by hand."
             )
+    # The batch headline gets the same treatment. The first hardening pass
+    # covered the serving fields and a second audit promptly forged batch_rps
+    # to 999999 and batch_best_size to 8 past it: a half guarded summary is an
+    # invitation, so the best set is re-derived and every batch field must
+    # restate it.
+    best_size, best_entry = max(raw["batch_sizes"].items(),
+                                key=lambda item: item[1]["best_rps"])
+    for key, expected_value in (("batch_rps", best_entry["best_rps"]),
+                                ("batch_best_size", int(best_size)),
+                                ("batch_band_pct", best_entry["band_pct"]),
+                                ("batch_range_pct", best_entry["range_pct"])):
+        if abs(float(raw[key]) - float(expected_value)) > 1e-9:
+            raise ProfileError(
+                f"{key} says {raw[key]!r} but the best batch set ({best_size}) "
+                f"gives {expected_value!r}. The top level summary has been "
+                "edited by hand."
+            )
     if raw["serving_rps"] <= 0 or raw["batch_rps"] <= 0:
         raise ProfileError("profile rates must be positive")
-    if raw["batch_rps"] < raw["serving_rps"]:
-        raise ProfileError(
-            "batch rate below single request rate: the profile is inconsistent "
-            "with how batching works and was probably truncated"
-        )
     return ThroughputProfile(
         serving_rps=float(raw["serving_rps"]),
         serving_band_pct=float(raw["serving_band_pct"]),

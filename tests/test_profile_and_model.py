@@ -67,13 +67,6 @@ def test_a_profile_with_a_truncated_run_list_is_refused(tmp_path):
         load_profile(_write(tmp_path, raw))
 
 
-def test_a_profile_where_batching_is_slower_than_single_rows_is_refused(tmp_path):
-    raw = _profile_raw()
-    raw["batch_rps"] = raw["serving_rps"] / 2
-    with pytest.raises(ProfileError, match="inconsistent"):
-        load_profile(_write(tmp_path, raw))
-
-
 def test_scaling_a_profile_moves_both_rates_together():
     profile = load_profile()
     scaled = profile.scaled(0.5)
@@ -174,4 +167,24 @@ def test_a_profile_with_a_hand_edited_median_is_refused(tmp_path):
     first = next(iter(raw["batch_sizes"]))
     raw["batch_sizes"][first]["median_rps"] = raw["batch_sizes"][first]["median_rps"] + 1
     with pytest.raises(ProfileError, match="edited by hand"):
+        load_profile(_write(tmp_path, raw))
+
+
+def test_a_profile_with_a_hand_edited_batch_summary_is_refused(tmp_path):
+    """The second audit forged batch_rps to 999999 and batch_best_size to 8
+    past the first hardening, which had covered only the serving fields."""
+    for key, value in (("batch_rps", 999999.0), ("batch_best_size", 8),
+                       ("batch_band_pct", 1.0)):
+        raw = _profile_raw()
+        raw[key] = value
+        with pytest.raises(ProfileError, match="edited by hand"):
+            load_profile(_write(tmp_path, raw))
+
+
+def test_the_default_path_refuses_a_profile_for_a_different_model(tmp_path):
+    """The second audit loaded a profile stamped with 64 zeros straight through
+    the default path, because the sha check only ran when a caller asked."""
+    raw = _profile_raw()
+    raw["model_sha256"] = "0" * 64
+    with pytest.raises(ProfileError, match="different model artifact"):
         load_profile(_write(tmp_path, raw))
