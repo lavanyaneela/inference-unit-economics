@@ -170,7 +170,10 @@ def cmd_table(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps([_line_dict(line) for line in lines], indent=2))
         return EXIT_DECIDED
+    dates = ", ".join(
+        f"{card.display_name} {card.captured_utc}" for card in cards.values())
     print(f"cost per 1,000 inferences at {scenario.traffic_rps:g} requests per second")
+    print(f"rate cards captured: {dates}; profile captured {profile.captured_utc}")
     print(f"{'placement':30s} {'service':44s} {'usd_per_1k':>14s}")
     for line in lines:
         print(f"{line.key:30s} {line.service:44s} {_fmt_usd(line.usd_per_1k):>14s}")

@@ -185,3 +185,12 @@ def test_coverage_json_mode_matches_the_module_output(capsys):
     assert main(["coverage", "--json"]) == EXIT_DECIDED
     payload = json.loads(capsys.readouterr().out)
     assert payload["missing_count"] == payload["quantities_total"] - payload["represented_count"]
+
+
+def test_the_table_prints_the_capture_dates_next_to_the_dollars(capsys):
+    """ADR-001 promises that every command printing a dollar prints the capture
+    date, and the audit found `iue table` printing twelve dollars and no date."""
+    main(["table"])
+    out = capsys.readouterr().out
+    assert "profile captured" in out
+    assert "rate cards captured" in out
