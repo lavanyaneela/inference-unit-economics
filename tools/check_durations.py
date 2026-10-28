@@ -62,6 +62,10 @@ ALLOWED_PATHS: dict[str, str] = {
     "tests/test_costing.py":
         "hand derivations in comments restate the declared inputs the assertions use",
     ".github/workflows/ci.yml": "timeouts and intervals, configuration",
+    "tools/record_demo.py": "pacing arithmetic for the replay, durations published nowhere",
+    "docs/video/manifest.json":
+        "per command wall times recorded so the replay can be paced, labelled "
+        "in the file itself as published nowhere",
 }
 
 #: Phrases that mark a duration on a line as a stated input rather than a

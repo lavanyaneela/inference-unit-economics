@@ -209,6 +209,14 @@ The refused report (`--max-band-pct 10`) is shot the same way:
 
 ![The refused report, exit 2, with the stabilisation path](docs/evidence/report-refused.png)
 
+![Six commands, three exit codes: a replay of captured output](docs/video/demo.gif)
+
+The recording is a replay, not a screen recording: every line of terminal text
+is real captured stdout and stderr, revealed at the pace of each command's
+measured wall time, and `docs/video/manifest.json` lists every command with its
+exit code. The pacing durations live only in that manifest, labelled as
+published nowhere.
+
 ## The fixtures, including the awkward parts
 
 - `fixtures/model/`: a small gradient boosted pipeline on a seeded synthetic

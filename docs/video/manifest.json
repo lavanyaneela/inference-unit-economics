@@ -1,0 +1,81 @@
+{
+  "note": "every line of terminal text in the recording is real captured output. The video is a replay of that output paced by each command's measured wall time, not a screen recording. Durations appear here for pacing and are published nowhere.",
+  "commands": [
+    {
+      "label": "iue decide",
+      "argv": [
+        "/usr/local/bin/python3",
+        "-m",
+        "inference_unit_economics.cli",
+        "decide"
+      ],
+      "exit_code": 0,
+      "seconds": 0.168
+    },
+    {
+      "label": "iue decide --providers gcp --traffic-rps 9.2",
+      "argv": [
+        "/usr/local/bin/python3",
+        "-m",
+        "inference_unit_economics.cli",
+        "decide",
+        "--providers",
+        "gcp",
+        "--traffic-rps",
+        "9.2"
+      ],
+      "exit_code": 1,
+      "seconds": 0.162
+    },
+    {
+      "label": "iue decide --max-band-pct 10",
+      "argv": [
+        "/usr/local/bin/python3",
+        "-m",
+        "inference_unit_economics.cli",
+        "decide",
+        "--max-band-pct",
+        "10"
+      ],
+      "exit_code": 2,
+      "seconds": 0.162
+    },
+    {
+      "label": "iue crossovers",
+      "argv": [
+        "/usr/local/bin/python3",
+        "-m",
+        "inference_unit_economics.cli",
+        "crossovers"
+      ],
+      "exit_code": 0,
+      "seconds": 0.227
+    },
+    {
+      "label": "iue table --latency deferred",
+      "argv": [
+        "/usr/local/bin/python3",
+        "-m",
+        "inference_unit_economics.cli",
+        "table",
+        "--latency",
+        "deferred"
+      ],
+      "exit_code": 0,
+      "seconds": 0.161
+    },
+    {
+      "label": "iue coverage",
+      "argv": [
+        "/usr/local/bin/python3",
+        "-m",
+        "inference_unit_economics.cli",
+        "coverage"
+      ],
+      "exit_code": 0,
+      "seconds": 0.237
+    }
+  ],
+  "mp4_bytes": 173853,
+  "gif_bytes": 924179
+}
