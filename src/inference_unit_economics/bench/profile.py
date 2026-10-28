@@ -92,10 +92,36 @@ def load_profile(path: Path = THROUGHPUT_PROFILE,
                 f"batch size {size} records {len(runs)} runs but the profile claims "
                 f"{raw['trials']} trials"
             )
-        if entry["best_rps"] != max(runs):
+        # Every summary statistic is recomputed from the committed runs and must
+        # match. The first version checked only best_rps, and an audit fed it a
+        # profile with band_pct hand edited from 16.58 to 3.0: the loader
+        # accepted it, and a tampered band is exactly the number the refusal
+        # semantics hang on. The summary is derivable, so it is derived.
+        import statistics
+
+        median = statistics.median(runs)
+        expected = {
+            "best_rps": max(runs),
+            "median_rps": median,
+            "band_pct": round(100.0 * (max(runs) - median) / median, 2),
+            "range_pct": round(100.0 * (max(runs) - min(runs)) / median, 2),
+        }
+        for key, value in expected.items():
+            if abs(float(entry.get(key, float("nan"))) - value) > 1e-9:
+                raise ProfileError(
+                    f"batch size {size}: {key} says {entry.get(key)!r} but the "
+                    f"committed runs give {value!r}. The profile has been edited "
+                    "by hand, and every summary must restate its own runs."
+                )
+    serving = raw["batch_sizes"].get("1")
+    if serving is None:
+        raise ProfileError("the profile records no batch size 1 trial set")
+    for key, top in (("serving_rps", "best_rps"), ("serving_band_pct", "band_pct"),
+                     ("serving_range_pct", "range_pct")):
+        if abs(float(raw[key]) - float(serving[top])) > 1e-9:
             raise ProfileError(
-                f"batch size {size}: best_rps does not equal the best recorded run. "
-                "The profile has been edited by hand."
+                f"{key} says {raw[key]!r} but batch size 1 gives {serving[top]!r}. "
+                "The top level summary has been edited by hand."
             )
     if raw["serving_rps"] <= 0 or raw["batch_rps"] <= 0:
         raise ProfileError("profile rates must be positive")

@@ -149,3 +149,29 @@ def test_a_swapped_model_file_is_refused_against_the_manifest(tmp_path):
 def test_a_missing_model_file_names_the_remedy(tmp_path):
     with pytest.raises(ModelError, match="make model"):
         OnnxModel(onnx_path=tmp_path / "nowhere.onnx", manifest_path=MODEL_MANIFEST)
+
+
+def test_a_profile_with_a_hand_edited_band_is_refused(tmp_path):
+    """The audit's tamper test, kept. The band is the single number the refusal
+    semantics hang on, and the first loader accepted a profile whose band_pct
+    had been edited from the committed 16.58 to a flattering 3.0."""
+    raw = _profile_raw()
+    first = next(iter(raw["batch_sizes"]))
+    raw["batch_sizes"][first]["band_pct"] = 3.0
+    with pytest.raises(ProfileError, match="edited by hand"):
+        load_profile(_write(tmp_path, raw))
+
+
+def test_a_profile_with_a_hand_edited_top_level_band_is_refused(tmp_path):
+    raw = _profile_raw()
+    raw["serving_band_pct"] = 3.0
+    with pytest.raises(ProfileError, match="edited by hand"):
+        load_profile(_write(tmp_path, raw))
+
+
+def test_a_profile_with_a_hand_edited_median_is_refused(tmp_path):
+    raw = _profile_raw()
+    first = next(iter(raw["batch_sizes"]))
+    raw["batch_sizes"][first]["median_rps"] = raw["batch_sizes"][first]["median_rps"] + 1
+    with pytest.raises(ProfileError, match="edited by hand"):
+        load_profile(_write(tmp_path, raw))
