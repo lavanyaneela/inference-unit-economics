@@ -26,8 +26,11 @@ the cheap choice changes. Questions it answers that a pricing page cannot:
 - **The crossover is not a property of the model.** For the same measured
   workload, the serverless to autoscaled flip is a **crossover at 9.2 requests**
   per second on GCP and a **flip at 280.9 requests** per second on AWS:
-  **30.5x apart**, set by the providers' billing increments rather than by
-  anything the model does. On Azure the flip never arrives in the swept range.
+  **30.5x apart**, and nothing the model does moves it. The gap decomposes
+  exactly: a **1.05x instance price** difference times a **29.0x per request**
+  cost difference, the second driven by the billing increment and, on AWS, by
+  a payload fee that outweighs the compute. On Azure the flip never arrives in
+  the swept range.
 - **A fast model is billed for the rounding, not the work.** The committed model
   sustains **93,104 single row requests** per second per process, so one request
   finishes far inside either provider's billing increment. The rounded bill runs
@@ -38,8 +41,9 @@ the cheap choice changes. Questions it answers that a pricing page cannot:
   setup window dwarfs the work, which finishes in moments at
   **306,284 rows per second** (batch size 128).
 - **The measurement argues back.** On the shared capture machine, single row
-  throughput varied by **46.2%** between the best and worst of **25 short
-  trials**; the decision band (best against median) is a **band of 16.6%**. The
+  throughput varied by **46.2%** (best run minus worst, over the median) across
+  **25 short trials**; the decision band (best against median) is a **band of
+  16.6%**. The
   tool refuses to decide (exit 2) whenever that band exceeds the scenario's
   ceiling, and around each crossover there is a zone, **a 1.21x span** of
   traffic, where the honest answer is exit 1: the inputs cannot pick.
@@ -97,7 +101,7 @@ reports them as co-winners rather than pretending one beat the other.
 The second row is the taxonomy's own finding: past that volume the cheapest
 "serverless" line is Azure Container Instances, which is serverless in
 provisioning and dedicated in billing, a small always on box that outruns per
-request rounding. ADR-004 takes that apart.
+request billing. ADR-004 takes that apart.
 
 ## What the bill is made of
 
@@ -132,7 +136,8 @@ quarter on the shared capture machine: a long window almost always contains a
 neighbour stall, and short windows had been dodging them by chance. The fix is
 the estimator in ADR-003: best of many short trials for capacity, best against
 median as the decision band, the full run list committed, and the worst case
-range (it **varied by 46.2%**) published rather than hidden.
+range (it **varied by 46.2%**, best minus worst over the median) published
+rather than hidden.
 
 **A coin toss wore a verdict.** The first decision rule tested only the band, so
 at the GCP crossover it printed a winner with a lead of a third of one percent:
@@ -202,7 +207,7 @@ The refused report (`--max-band-pct 10`) is shot the same way:
   bytes for everyone.
 - `fixtures/throughput/profile.json`: the measurement of record, with every run
   of every trial committed, including the stalled ones that put the worst case
-  range at nearly half. Nothing about the noise is edited out, and the loader
+  range at nearly half the median. Nothing about the noise is edited out, and the loader
   refuses a profile whose summary disagrees with its own runs.
 - `fixtures/rate_cards/`: dated, sourced, schema checked. The awkward entry is
   Azure's serverless placement, which is billed while running rather than per

@@ -35,10 +35,30 @@ def main() -> dict:
     ]
     ratio = (flips["aws"] / flips["gcp"]
              if flips.get("aws") and flips.get("gcp") else None)
+    # The decomposition the first draft of the prose skipped, and an audit
+    # demanded: the flips sit apart by the product of the instance price ratio
+    # and the per request cost ratio, and only the second of those is mostly
+    # the billing increment. On AWS the payload fee is most of the per request
+    # bill, so "the increments differ 100x" does not survive contact with E2.
+    e2 = json.loads((OUT / "e2_cost_table.json").read_text(encoding="utf-8"))
+    per_1k = {line["key"]: line["usd_per_1k"] for line in e2["lines"]}
+    aws_instance = cards["aws"].instance_for("realtime_autoscaled").usd_per_hour
+    gcp_instance = cards["gcp"].instance_for("realtime_autoscaled").usd_per_hour
+    instance_price_ratio = aws_instance / gcp_instance
+    per_request_cost_ratio = per_1k["gcp/serverless"] / per_1k["aws/serverless"]
+    if ratio is not None:
+        product = instance_price_ratio * per_request_cost_ratio
+        if abs(product / ratio - 1.0) > 1e-9:
+            raise SystemExit(
+                f"decomposition does not multiply back: {instance_price_ratio} x "
+                f"{per_request_cost_ratio} = {product}, flip ratio {ratio}"
+            )
     result = {
         "experiment": "e3_crossovers",
         "serverless_to_autoscaled_rps": flips,
         "aws_over_gcp_flip_ratio": ratio,
+        "instance_price_ratio_aws_over_gcp": instance_price_ratio,
+        "per_request_cost_ratio_gcp_over_aws": per_request_cost_ratio,
         "azure_flip_exists_in_range": flips["azure"] is not None,
         "interactive_leader_changes": leader_changes,
         "sweep_range_rps": [0.01, 2000.0],

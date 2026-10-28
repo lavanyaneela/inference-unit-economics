@@ -6,6 +6,8 @@
     "gcp": 9.217171717171716
   },
   "aws_over_gcp_flip_ratio": 30.47405585834214,
+  "instance_price_ratio_aws_over_gcp": 1.0502283105022832,
+  "per_request_cost_ratio_gcp_over_aws": 29.016601012943163,
   "azure_flip_exists_in_range": false,
   "interactive_leader_changes": [
     {

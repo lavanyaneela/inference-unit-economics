@@ -25,12 +25,16 @@ below.
 **Claim: the same model flips from serverless to autoscaled at a crossover at
 9.2 requests per second on GCP and a flip at 280.9 requests per second on AWS,
 30.5x apart.**
-Prove it: `iue crossovers --json`. The mechanism: one request finishes far
-inside either billing increment (the model sustains 93,104 single row requests
-per second per process), so the serverless bill is the increment, and the
-increments differ 100x between the providers. If pushed: the azure entry shows
-the third shape, no crossover in the swept range, because its serverless shaped
-offer is billed while running (ADR-004).
+Prove it: `iue crossovers --json`. The mechanism, and get this exact, because
+it is the first thing a numerate interviewer checks: the flip volume is the
+instance price divided by the serverless per request cost, so the gap is a
+1.05x instance price ratio times a 29.0x per request cost ratio, and the
+product multiplies back to 30.5x to the digit (E3 asserts it). The per request
+ratio is where the increments live, and it is 29.0x per request rather than 100x because the
+increment is not the whole per request bill: on AWS the payload fee costs 1.8
+times the compute, and on GCP a request fee sits on top. If pushed: the azure
+entry shows the third shape, no crossover in the swept range, because its
+serverless shaped offer is billed while running (ADR-004).
 
 **Claim: the billing increment, not the compute, is the serverless bill: 93x on
 SageMaker and 9,310x on Cloud Run for this model, and on SageMaker the payload

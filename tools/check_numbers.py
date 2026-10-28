@@ -51,6 +51,7 @@ EXEMPT_NUMBERS: dict[str, str] = {
     "4": "the serving placements per provider and the sensitivity search span",
     "12": "the priced lines in the table: four placements across three providers",
     "43": "the first harness's trial length in ms, quoted as the bug's symptom",
+    "2000": "the crossover sweep's upper bound in requests per second, a declared input",
     "1.00": "parity, the margin of an exact tie",
 }
 

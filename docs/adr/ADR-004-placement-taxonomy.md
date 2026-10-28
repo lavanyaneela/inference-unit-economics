@@ -27,7 +27,8 @@ for a custom model on Azure, bills the container group for its lifetime whether
 or not a request arrives. It is serverless in provisioning and dedicated in
 billing, which is why the model prices it as the smallest always on unit, why it
 cannot scale to zero in the table, and why above 120.7 requests per second it
-becomes the cheapest interactive line on any provider: at that point the race is
+becomes the cheapest interactive line on any provider, inside the swept range
+(up to 2,000 requests per second): at that point the race is
 between per request rounding and a small always on box, and the box wins.
 
 A reviewer who disagrees with calling ACI serverless is agreeing with the ADR:
