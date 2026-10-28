@@ -28,8 +28,8 @@
     "tf_representable": 6,
     "tf_unrepresentable": 17,
     "capture_date": "2026-10-28",
-    "tests_total": 154,
-    "coverage_line_pct": 98.11946902654867
+    "tests_total": 158,
+    "coverage_line_pct": 98.0349344978166
   },
   "rendered": {
     "serving_rps": "93,104",
@@ -60,8 +60,8 @@
     "tf_representable": "6",
     "tf_unrepresentable": "17",
     "capture_date": "2026-10-28",
-    "tests_total": "154",
-    "coverage_line_pct": "98.1"
+    "tests_total": "158",
+    "coverage_line_pct": "98.0"
   },
   "anchors": {
     "serving_rps": [
