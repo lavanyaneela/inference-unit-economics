@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "provider": "gcp",
+  "display_name": "Google Cloud",
+  "region": "us-central1",
+  "currency": "USD",
+  "captured_utc": "2026-10-28",
+  "sources": [
+    {
+      "url": "https://cloud.google.com/vertex-ai/pricing",
+      "note": "Vertex AI prediction node-hour table, Americas: n1-standard-2 and n1-standard-4 on demand; batch prediction billed at the same node-hour rates."
+    },
+    {
+      "url": "https://cloud.google.com/run/pricing",
+      "note": "Cloud Run request-based billing, tier 1: per vCPU-second, per GiB-second, per million requests; billable time rounded up to the nearest 100 ms."
+    }
+  ],
+  "instances": {
+    "n1-standard-2": { "usd_per_hour": 0.1095, "vcpus": 2, "memory_gb": 7.5 },
+    "n1-standard-4": { "usd_per_hour": 0.219, "vcpus": 4, "memory_gb": 15 }
+  },
+  "placements": {
+    "realtime_dedicated": {
+      "service": "Vertex AI online prediction endpoint",
+      "billing_unit": "instance_hour",
+      "instance": "n1-standard-2"
+    },
+    "realtime_autoscaled": {
+      "service": "Vertex AI online prediction endpoint with autoscaling",
+      "billing_unit": "instance_hour",
+      "instance": "n1-standard-2"
+    },
+    "serverless": {
+      "service": "Cloud Run, request-based billing",
+      "billing_unit": "request_compute",
+      "usd_per_gb_second": 0.0000025,
+      "usd_per_vcpu_second": 0.000024,
+      "usd_per_million_requests": 0.40,
+      "usd_per_gb_data_processed": 0.0,
+      "billing_increment_ms": 100,
+      "memory_gb_options": [0.5, 1, 2, 4, 8]
+    },
+    "batch": {
+      "service": "Vertex AI batch prediction",
+      "billing_unit": "instance_hour",
+      "instance": "n1-standard-2",
+      "job_setup_billed_s": 120,
+      "job_setup_note": "Node provisioning for a batch job is billed; the setup window is a declared input, not a measurement."
+    }
+  }
+}

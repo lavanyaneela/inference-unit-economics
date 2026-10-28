@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "provider": "azure",
+  "display_name": "Microsoft Azure",
+  "region": "eastus",
+  "currency": "USD",
+  "captured_utc": "2026-10-28",
+  "sources": [
+    {
+      "url": "https://azure.microsoft.com/en-us/pricing/details/machine-learning/",
+      "note": "Azure Machine Learning bills the underlying compute with no service surcharge; managed online endpoints and compute clusters run on the VM rates below."
+    },
+    {
+      "url": "https://sparecores.com/server/azure/Standard_DS3_v2",
+      "note": "Standard_DS3_v2 on demand, eastus."
+    },
+    {
+      "url": "https://prices.azure.com/api/retail/prices?$filter=serviceName%20eq%20%27Container%20Instances%27%20and%20armRegionName%20eq%20%27eastus%27",
+      "note": "Azure Retail Prices API: Container Instances standard vCPU and memory duration meters, eastus."
+    }
+  ],
+  "instances": {
+    "Standard_DS3_v2": { "usd_per_hour": 0.293, "vcpus": 4, "memory_gb": 14 }
+  },
+  "placements": {
+    "realtime_dedicated": {
+      "service": "Azure ML managed online endpoint",
+      "billing_unit": "instance_hour",
+      "instance": "Standard_DS3_v2"
+    },
+    "realtime_autoscaled": {
+      "service": "Azure ML managed online endpoint with autoscaling",
+      "billing_unit": "instance_hour",
+      "instance": "Standard_DS3_v2"
+    },
+    "serverless": {
+      "service": "Azure Container Instances",
+      "billing_unit": "container_group_hour",
+      "usd_per_vcpu_hour": 0.0405,
+      "usd_per_gb_hour": 0.00445,
+      "scale_to_zero": false,
+      "billing_increment_ms": 1000,
+      "note": "ACI bills the container group for its lifetime, per second, whether or not a request is in flight. The placement that answers to the name serverless on this provider is not per-request billed, which is itself a finding the comparison table surfaces rather than papers over."
+    },
+    "batch": {
+      "service": "Azure ML compute cluster batch job",
+      "billing_unit": "instance_hour",
+      "instance": "Standard_DS3_v2",
+      "job_setup_billed_s": 120,
+      "job_setup_note": "Cluster node spin-up is billed; the setup window is a declared input, not a measurement."
+    }
+  }
+}

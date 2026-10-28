@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "provider": "aws",
+  "display_name": "AWS",
+  "region": "us-east-1",
+  "currency": "USD",
+  "captured_utc": "2026-10-28",
+  "sources": [
+    {
+      "url": "https://aws.amazon.com/sagemaker-ai/pricing/",
+      "note": "SageMaker AI pricing page: serverless compute per second at 2 GB, data processing per GB, real-time instance examples."
+    },
+    {
+      "url": "https://cloudchipr.com/blog/amazon-sagemaker-pricing",
+      "note": "Instance table cross-check for ml.m5.large and ml.c5.xlarge, US East (N. Virginia)."
+    }
+  ],
+  "instances": {
+    "ml.m5.large": { "usd_per_hour": 0.115, "vcpus": 2, "memory_gb": 8 },
+    "ml.c5.xlarge": { "usd_per_hour": 0.204, "vcpus": 4, "memory_gb": 8 }
+  },
+  "placements": {
+    "realtime_dedicated": {
+      "service": "SageMaker real-time endpoint",
+      "billing_unit": "instance_hour",
+      "instance": "ml.m5.large"
+    },
+    "realtime_autoscaled": {
+      "service": "SageMaker real-time endpoint with application autoscaling",
+      "billing_unit": "instance_hour",
+      "instance": "ml.m5.large"
+    },
+    "serverless": {
+      "service": "SageMaker Serverless Inference",
+      "billing_unit": "request_compute",
+      "usd_per_gb_second": 0.00002,
+      "usd_per_vcpu_second": 0.0,
+      "usd_per_million_requests": 0.0,
+      "usd_per_gb_data_processed": 0.016,
+      "billing_increment_ms": 1,
+      "memory_gb_options": [1, 2, 3, 4, 5, 6]
+    },
+    "batch": {
+      "service": "SageMaker Batch Transform",
+      "billing_unit": "instance_hour",
+      "instance": "ml.m5.large",
+      "job_setup_billed_s": 120,
+      "job_setup_note": "Batch Transform bills the instance from provisioning; the setup window is a declared input, not a measurement."
+    }
+  }
+}
